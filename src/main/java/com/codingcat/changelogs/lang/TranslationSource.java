@@ -72,7 +72,12 @@ public final class TranslationSource {
         for (Map.Entry<String, Map<String, String>> entry : rawLanguageData.entrySet()) {
             Locale locale;
             try {
-                locale = Locale.of(entry.getKey());
+                String key = entry.getKey().replace("-", "_");
+                if (key.endsWith("_")) key = key.replace("_", "");
+                locale = key.contains("_") ? Locale.of(
+                        key.substring(0, key.indexOf('_')).toLowerCase(Locale.ROOT),
+                        key.substring(key.indexOf("_") + 1).toUpperCase(Locale.ROOT)
+                ) : Locale.of(key);
             } catch (Exception e) {
                 logger.warn("Skipping unknown language entry \"{}\"", entry.getKey());
                 continue;

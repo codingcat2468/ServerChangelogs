@@ -18,20 +18,22 @@ public final class ResourceUtil {
     private static final ClassLoader classLoader = ResourceUtil.class.getClassLoader();
 
     public static @NotNull Map<String, String> readResourcesAsString(@NotNull String dirPath) {
-        try {
-            Collection<String> resources = listResources(dirPath);
-            Map<String, String> data = new HashMap<>();
-            for (String resource : resources) {
-                Path path = Path.of(dirPath).resolve(resource);
-                InputStream stream = classLoader.getResourceAsStream(path.toString());
-                if (stream == null) continue;
-                String string = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-                data.put(resource, string);
-                stream.close();
-            }
-            return data;
+        Collection<String> resources = listResources(dirPath);
+        Map<String, String> data = new HashMap<>();
+        for (String resource : resources) {
+            Path path = Path.of(dirPath).resolve(resource);
+            String string = readResourceAsString(path.toString());
+            data.put(resource, string);
+        }
+        return data;
+    }
+
+    public static @NotNull String readResourceAsString(@NotNull String path) {
+        try (InputStream stream = classLoader.getResourceAsStream(path)) {
+            if (stream == null) throw new RuntimeException("Resource not found: " + path);
+            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read jar resources", e);
+            throw new RuntimeException("Failed to read jar resource at " + path, e);
         }
     }
 
@@ -42,7 +44,9 @@ public final class ResourceUtil {
             Path path = fileSystem.getPath(dirPath);
             Collection<String> resources;
             try (Stream<Path> stream = Files.walk(path, 1)) {
-                resources = stream.map(p -> p.getFileName().toString()).toList();
+                resources = stream.map(p -> p.getFileName().toString())
+                        .filter(n -> !n.equals(path.getFileName().toString()))
+                        .toList();
             }
             fileSystem.close();
             return resources;

@@ -1,0 +1,11 @@
+#
+# ---- ServerChangelogs by codingcat2468 ----
+# Translation files can be found in the "lang" directory.
+# The language shown to the player is automatically determined by
+# paper/adventure based on the selected language of the client.
+#
+
+# The changelog storage is used to store all server changelogs.
+# Currently, the only option available is "yaml", which stores changelogs
+# in a human-readable YAML configuration file.
+changelog_storage: yaml

@@ -61,7 +61,17 @@ public final class ServerChangelogs extends JavaPlugin {
         this.translationSource = new TranslationSource(translationPath, getPluginMeta(), logger);
         this.translationSource.reload();
         info("console.startup");
-        this.config = new PluginConfig(this, getDataPath().resolve("config.yml"));
+        Path configPath = getDataPath().resolve("config.yml");
+        if (!configPath.toFile().exists()) {
+            logger.info("Creating default configuration file...");
+            String defaultConfig = ResourceUtil.readResourceAsString("defaults/config.yml");
+            try {
+                Files.writeString(configPath, defaultConfig, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
+            } catch (IOException e) {
+                logger.warn("Failed to create default config file \"{}\":", configPath, e);
+            }
+        }
+        this.config = new PluginConfig(this, configPath);
         this.config.tryReload();
         this.changelogStorage = this.config.createChangelogStorage();
         info("console.startup_storage", text(this.changelogStorage.getDisplayName()));

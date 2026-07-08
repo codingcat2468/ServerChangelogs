@@ -19,6 +19,11 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+        uses: gradle/actions/setup-gradle@v6
       - name: Build with Gradle Wrapper
         run: ./gradlew build
+      - name: Upload built artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Built Artifacts
+          path: build/libs

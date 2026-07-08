@@ -16,3 +16,13 @@ command:
       io: "<prefix><red>An unexpected I/O error occurred while trying to reload, check the console for more details!"
       details: "<red>Details for unexpected reload error:"
       invalid: "<prefix><red>Invalid configuration: <yellow><arg:0>"
+dialog:
+  create:
+    title: "<gradient:#a366ff:#9999ff><b>Create Changelog"
+    subtitle: "This action will <green>create</green> a new changelog entry <aqua>#<arg:0>"
+    input:
+      contents: "Lines <gray>(newline = separate sub-change)</gray>"
+      author: "Author <gray>(optional)</gray>"
+    button:
+      publish: "<sprite:gui:icon/news> <aqua><b>Publish Changelog"
+      cancel: "<sprite:gui:spectator/close> <red><b>Cancel"

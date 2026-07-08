@@ -31,3 +31,15 @@ dialog:
     success: "<prefix><sprite:gui:icon/checkmark> <green>Successfully published a new changelog!"
     error:
       content_empty: "<prefix><red>Please specify at least one changelog line"
+  changelog:
+    title: "<gradient:#a366ff:#9999ff><b>Server Changelog"
+    entry: |-
+      <dark_gray><strikethrough>                            <reset> <gradient:green:red><u>Changelog from <arg:0></u></gradient> <dark_gray><strikethrough>                            
+      
+      <reset><arg:1>
+      
+      <reset><gray>Published by <white><arg:2></white></gray>
+    entry_line: "<gray>- <reset><arg:0>"
+    unspecified_author: "<dark_red>Unspecified"
+    button:
+      close: "<sprite:gui:icon/checkmark> <green>Exit"

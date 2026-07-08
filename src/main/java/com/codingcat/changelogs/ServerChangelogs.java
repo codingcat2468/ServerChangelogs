@@ -107,6 +107,10 @@ public final class ServerChangelogs extends JavaPlugin {
         info("console.shutdown");
     }
 
+    public @NotNull PluginConfig pluginConfig() {
+        return this.config;
+    }
+
     public static void info(@NotNull String key, @NotNull ComponentLike... args) {
         logger.info(translateConsole(key, args));
     }

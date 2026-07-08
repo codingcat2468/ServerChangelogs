@@ -1,7 +1,13 @@
 package com.codingcat.changelogs;
 
+import com.codingcat.changelogs.command.BrigadierSubCommand;
 import com.codingcat.changelogs.lang.TranslationSource;
 import com.codingcat.changelogs.util.ResourceUtil;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
@@ -17,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 
 import static com.codingcat.changelogs.lang.TranslationSource.translatable;
@@ -46,6 +53,15 @@ public final class ServerChangelogs extends JavaPlugin {
         this.translationSource = new TranslationSource(translationPath, getPluginMeta(), logger);
         this.translationSource.reload();
         info("console.startup");
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
+            LiteralCommandNode<CommandSourceStack> rootNode = Commands.literal(NAMESPACE)
+                    .executes(ctx -> {
+                        ctx.getSource().getSender().sendMessage(translatable("command.root"));
+                        return Command.SINGLE_SUCCESS;
+                    }).build();
+            BrigadierSubCommand.COMMANDS.forEach(c -> rootNode.addChild(c.build(this)));
+            commands.registrar().register(rootNode, Set.of("changelogs", "scl"));
+        });
     }
 
     public void reload() {

@@ -9,3 +9,17 @@
 # Currently, the only option available is "yaml", which stores changelogs
 # in a human-readable YAML configuration file.
 changelog_storage: yaml
+
+# The format used to display the date/time of a given changelog.
+# yyyy = year (with 4 digits)
+# dd = day of the month (2 digits)
+# MM = month of year (2 digits)
+# HH = the hour (24-hour format; 2 digits)
+# hh = the hour (12-hour format; 2 digits)
+# mm = the minute (2 digits)
+# ss = the second (2 digits)
+date_format: "yyyy/dd/MM"
+
+# The timezone in which the time a changelog was published will be displayed.
+# This can be a text identifier, such as "Europe/Paris" or a UTC offset specifier like "UTC+1".
+date_timezone: "UTC"

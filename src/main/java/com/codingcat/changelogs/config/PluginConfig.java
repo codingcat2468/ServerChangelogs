@@ -10,6 +10,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 @RequiredArgsConstructor
 public class PluginConfig extends YamlConfiguration {
@@ -33,6 +35,7 @@ public class PluginConfig extends YamlConfiguration {
     public @Nullable String validate() {
         try {
             createChangelogStorage();
+            getDateFormatter();
             return null;
         } catch (Exception e) {
             return e.getMessage();
@@ -41,5 +44,10 @@ public class PluginConfig extends YamlConfiguration {
 
     public @NotNull ChangelogStorage createChangelogStorage() throws RuntimeException {
         return ChangelogStorage.create(getString("changelog_storage", "yaml"), this.plugin);
+    }
+
+    public @NotNull DateTimeFormatter getDateFormatter() {
+        return DateTimeFormatter.ofPattern(getString("date_format", "----"))
+                .withZone(ZoneId.of(getString("date_timezone", "UTC")));
     }
 }

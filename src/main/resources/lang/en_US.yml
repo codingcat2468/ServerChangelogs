@@ -18,6 +18,7 @@ command:
       details: "<red>Details for unexpected reload error:"
       invalid: "<prefix><red>Invalid configuration: <yellow><arg:0>"
 dialog:
+  error: "<red>An unexpected error occurred while trying to process a dialog action:"
   create:
     title: "<gradient:#a366ff:#9999ff><b>Create Changelog"
     subtitle: "This action will <green>create</green> a new changelog entry <aqua>#<arg:0>"

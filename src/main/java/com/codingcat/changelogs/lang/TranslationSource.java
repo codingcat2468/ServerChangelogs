@@ -16,6 +16,7 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.TranslationStore;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -104,9 +105,9 @@ public final class TranslationSource {
                     .filter(k -> !langFile.isConfigurationSection(k))
                     .collect(Collectors.toUnmodifiableMap(k -> ServerChangelogs.NAMESPACE + "." + k, langFile::getString));
         } catch (IOException e) {
-            logger.warn("Failed to load language file {} due to I/O errors:", langFile, e);
+            logger.warn("Failed to load language file {} due to I/O errors:", fileName, e);
         } catch (InvalidConfigurationException e) {
-            logger.warn("Invalid syntax in language file {}:", langFile, e);
+            logger.warn("Invalid syntax in language file {}:", fileName, e);
         }
         return null;
     }
@@ -131,5 +132,14 @@ public final class TranslationSource {
 
     public static @NotNull TranslatableComponent translatable(@NotNull String key, @NotNull ComponentLike... args) {
         return Component.translatable(ServerChangelogs.NAMESPACE + "." + key, args);
+    }
+
+    /**
+     * Used in dialogs specifically since paper doesn't provide {@link GlobalTranslator}
+     * support for those yet (see <a href="https://github.com/PaperMC/Paper/issues/12971">this issue</a>)
+     */
+    public static @NotNull Component translatableManual(@NotNull Player player, @NotNull String key, @NotNull ComponentLike... args) {
+        Component translation = GlobalTranslator.translator().translate(translatable(key, args), player.locale());
+        return Objects.requireNonNullElseGet(translation, () -> text(key));
     }
 }

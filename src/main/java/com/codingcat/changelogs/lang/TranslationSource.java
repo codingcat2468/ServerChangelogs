@@ -140,6 +140,6 @@ public final class TranslationSource {
      */
     public static @NotNull Component translatableManual(@NotNull Player player, @NotNull String key, @NotNull ComponentLike... args) {
         Component translation = GlobalTranslator.translator().translate(translatable(key, args), player.locale());
-        return Objects.requireNonNullElseGet(translation, () -> text(key));
+        return Objects.requireNonNullElseGet(translation, () -> text(ServerChangelogs.NAMESPACE + "." + key));
     }
 }

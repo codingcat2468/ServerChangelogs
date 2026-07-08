@@ -1,6 +1,7 @@
 package com.codingcat.changelogs;
 
 import com.codingcat.changelogs.lang.TranslationSource;
+import com.codingcat.changelogs.util.ResourceUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
@@ -9,7 +10,11 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
@@ -28,8 +33,16 @@ public final class ServerChangelogs extends JavaPlugin {
     public void onEnable() {
         logger = this.getComponentLogger();
         Path translationPath = getDataPath().resolve("lang");
-        if (!translationPath.toFile().exists()) //noinspection ResultOfMethodCallIgnored
-            translationPath.toFile().mkdirs();
+        if (translationPath.toFile().mkdirs()) {
+            logger.info("Creating default translation files...");
+            ResourceUtil.readResourcesAsString("lang").forEach((fname, contents) -> {
+                try {
+                    Files.writeString(translationPath.resolve(fname), contents, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
+                } catch (IOException e) {
+                    logger.warn("Failed to create default translation file \"{}\":", fname, e);
+                }
+            });
+        }
         this.translationSource = new TranslationSource(translationPath, getPluginMeta(), logger);
         this.translationSource.reload();
         info("console.startup");

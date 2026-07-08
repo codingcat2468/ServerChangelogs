@@ -1,0 +1,3 @@
+console:
+  startup: "Starting <green><plugin:name></green> <gray>v<plugin:version></gray> by <aqua><plugin:authors></aqua>"
+  shutdown: "<red>Shutting down, bye!"

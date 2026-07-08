@@ -6,6 +6,7 @@ console:
   reload: "<aqua>Reloading plugin..."
   shutdown: "<red>Shutting down, bye!"
 command:
+  onlyplayer: "<prefix><red>This command can only be executed by a player"
   root: |-
     <dark_gray><strikethrough>              <reset> <translate:plugin_name> <gray>v<plugin:version></gray> <dark_gray><strikethrough>              
     <reset><plugin:description>

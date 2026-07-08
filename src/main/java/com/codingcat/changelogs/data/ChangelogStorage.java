@@ -17,7 +17,7 @@ public interface ChangelogStorage {
 
     @NotNull List<ChangelogEntry> listEntries();
 
-    int allocateUID();
+    int nextUID();
 
     @NotNull String getDisplayName();
 

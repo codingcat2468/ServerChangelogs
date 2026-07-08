@@ -116,7 +116,7 @@ public class YamlChangelogStorage implements ChangelogStorage {
     }
 
     @Override
-    public int allocateUID() {
+    public int nextUID() {
         return this.cache.size();
     }
 

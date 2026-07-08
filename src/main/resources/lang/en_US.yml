@@ -26,3 +26,6 @@ dialog:
     button:
       publish: "<sprite:gui:icon/news> <aqua><b>Publish Changelog"
       cancel: "<sprite:gui:spectator/close> <red><b>Cancel"
+    success: "<prefix><sprite:gui:icon/checkmark> <green>Successfully published a new changelog!"
+    error:
+      content_empty: "<prefix><red>Please specify at least one changelog line"

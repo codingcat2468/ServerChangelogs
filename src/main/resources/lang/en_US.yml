@@ -2,7 +2,7 @@ plugin_name: "<gradient:#a366ff:#9999ff><b><plugin:name>"
 prefix: "<translate:plugin_name><reset><dark_gray> » <reset>"
 console:
   startup: "Starting <translate:plugin_name> <gray>v<plugin:version></gray> by <aqua><plugin:authors></aqua>"
-  startup.changelog_storage: "Initializing <green>\"<arg:0>\"</green> changelog storage..."
+  startup_storage: "Initializing <green>\"<arg:0>\"</green> changelog storage..."
   reload: "<aqua>Reloading plugin..."
   shutdown: "<red>Shutting down, bye!"
 command:

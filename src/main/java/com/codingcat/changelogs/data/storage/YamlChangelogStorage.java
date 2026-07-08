@@ -5,7 +5,6 @@ import com.codingcat.changelogs.data.ChangelogStorage;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -69,12 +68,13 @@ public class YamlChangelogStorage implements ChangelogStorage {
 
     private @NotNull List<ChangelogEntry> deserializeEntries(@NotNull YamlConfiguration config) {
         try {
-            List<?> entries = config.getList("entries");
+            List<Map<?, ?>> entries = config.getMapList("entries");
             Objects.requireNonNull(entries, "entries");
             List<ChangelogEntry> results = new ArrayList<>();
             for (int i = 0; i < entries.size(); i++) {
-                ConfigurationSection section = (ConfigurationSection) entries.get(i);
-                results.add(this.deserializeEntry(i, section));
+                //noinspection unchecked
+                Map<String, ?> data = (Map<String, ?>) entries.get(i);
+                results.add(this.deserializeEntry(i, data));
             }
             return results;
         } catch (Exception e) {
@@ -82,13 +82,14 @@ public class YamlChangelogStorage implements ChangelogStorage {
         }
     }
 
-    private @NotNull ChangelogEntry deserializeEntry(int uid, @NotNull ConfigurationSection section) {
-        List<Component> lines = section.getStringList("serializedLines")
+    private @NotNull ChangelogEntry deserializeEntry(int uid, @NotNull Map<String, ?> data) {
+        //noinspection unchecked
+        List<Component> lines = ((List<String>) data.get("serializedLines"))
                 .stream().map(GsonComponentSerializer.gson()::deserialize)
                 .toList();
-        String recordedAtRaw = Objects.requireNonNull(section.getString("recordedAt"), "recordedAt");
+        String recordedAtRaw = Objects.requireNonNull((String) data.get("recordedAt"), "recordedAt");
         Instant recordedAt = DateTimeFormatter.ISO_INSTANT.parse(recordedAtRaw, Instant::from);
-        Component author = Optional.ofNullable(section.getString("author"))
+        Component author = Optional.ofNullable((String) data.get("author"))
                 .map(GsonComponentSerializer.gson()::deserialize)
                 .orElse(null);
         return new ChangelogEntry(uid, lines, recordedAt, author);

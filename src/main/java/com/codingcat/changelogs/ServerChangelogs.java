@@ -1,6 +1,7 @@
 package com.codingcat.changelogs;
 
 import com.codingcat.changelogs.command.BrigadierSubCommand;
+import com.codingcat.changelogs.config.PluginConfig;
 import com.codingcat.changelogs.lang.TranslationSource;
 import com.codingcat.changelogs.util.ResourceUtil;
 import com.mojang.brigadier.Command;
@@ -13,6 +14,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.translation.GlobalTranslator;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,6 +37,7 @@ public final class ServerChangelogs extends JavaPlugin {
     public static final Function<String, Key> KEY_GENERATOR = path -> Key.key(NAMESPACE, path);
     private static ComponentLogger logger;
     private TranslationSource translationSource;
+    private PluginConfig config;
 
     @Override
     public void onEnable() {
@@ -53,6 +56,8 @@ public final class ServerChangelogs extends JavaPlugin {
         this.translationSource = new TranslationSource(translationPath, getPluginMeta(), logger);
         this.translationSource.reload();
         info("console.startup");
+        this.config = new PluginConfig(this, getDataPath().resolve("config.yml"));
+        this.config.tryReload();
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
             LiteralCommandNode<CommandSourceStack> rootNode = Commands.literal(NAMESPACE)
                     .executes(ctx -> {
@@ -64,9 +69,12 @@ public final class ServerChangelogs extends JavaPlugin {
         });
     }
 
-    public void reload() {
+    public void reload() throws IOException, InvalidConfigurationException {
         info("console.reload");
         this.translationSource.reload();
+        this.config.reload();
+        String err = this.config.validate();
+        if (err != null) throw new InvalidConfigurationException(err);
     }
 
     @Override

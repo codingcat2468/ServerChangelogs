@@ -38,6 +38,10 @@ public class YamlChangelogStorage implements ChangelogStorage {
     }
 
     @Override
+    public void shutdown() {
+    }
+
+    @Override
     public void storeEntry(@NotNull ChangelogEntry entry) {
         this.cache.add(entry.uid(), entry);
         this.save();
@@ -113,5 +117,10 @@ public class YamlChangelogStorage implements ChangelogStorage {
     @Override
     public int allocateUID() {
         return this.cache.size();
+    }
+
+    @Override
+    public @NotNull String getDisplayName() {
+        return "YAML File";
     }
 }

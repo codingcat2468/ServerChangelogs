@@ -2,6 +2,7 @@ package com.codingcat.changelogs;
 
 import com.codingcat.changelogs.command.BrigadierSubCommand;
 import com.codingcat.changelogs.config.PluginConfig;
+import com.codingcat.changelogs.data.ChangelogStorage;
 import com.codingcat.changelogs.lang.TranslationSource;
 import com.codingcat.changelogs.util.ResourceUtil;
 import com.mojang.brigadier.Command;
@@ -38,6 +39,7 @@ public final class ServerChangelogs extends JavaPlugin {
     private static ComponentLogger logger;
     private TranslationSource translationSource;
     private PluginConfig config;
+    private ChangelogStorage changelogStorage;
 
     @Override
     public void onEnable() {
@@ -58,6 +60,9 @@ public final class ServerChangelogs extends JavaPlugin {
         info("console.startup");
         this.config = new PluginConfig(this, getDataPath().resolve("config.yml"));
         this.config.tryReload();
+        this.changelogStorage = this.config.createChangelogStorage();
+        info("console.startup.changelog_storage", text(this.changelogStorage.getDisplayName()));
+        this.changelogStorage.init();
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
             LiteralCommandNode<CommandSourceStack> rootNode = Commands.literal(NAMESPACE)
                     .executes(ctx -> {
@@ -75,6 +80,10 @@ public final class ServerChangelogs extends JavaPlugin {
         this.config.reload();
         String err = this.config.validate();
         if (err != null) throw new InvalidConfigurationException(err);
+        this.changelogStorage.shutdown();
+        this.changelogStorage = this.config.createChangelogStorage();
+        info("console.startup.changelog_storage", text(this.changelogStorage.getDisplayName()));
+        this.changelogStorage.init();
     }
 
     @Override

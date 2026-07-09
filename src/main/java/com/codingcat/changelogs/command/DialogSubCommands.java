@@ -27,6 +27,10 @@ public class DialogSubCommands {
         return commandSet;
     }
 
+    public static @NotNull LiteralCommandNode<CommandSourceStack> buildDedicatedChangelogCommand(@NotNull ServerChangelogs plugin) {
+        return new Command("changelog", ChangelogDialog.class).build(plugin);
+    }
+
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     private static class Command implements BrigadierCommandNode {
         private final @NotNull String name;

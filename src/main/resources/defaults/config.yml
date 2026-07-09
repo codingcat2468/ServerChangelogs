@@ -20,6 +20,12 @@ changelog_storage: yaml
 # ss = the second (2 digits)
 date_format: "yyyy/dd/MM"
 
-# The timezone in which the time a changelog was published will be displayed.
+# The timezone in which the time a changelog was published at will be displayed.
 # This can be a text identifier, such as "Europe/Paris" or a UTC offset specifier like "UTC+1".
 date_timezone: "UTC"
+
+# Whether the plugin should register a dedicated /changelog command (not /changelogS).
+# This can be useful if you want a more intuitive experience for players,
+# where they don't have to type "/changelogs view".
+# NOTE: Changing this setting requires a restart of your server!
+register_dedicated_command: true

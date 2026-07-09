@@ -1,6 +1,7 @@
 package com.codingcat.changelogs;
 
 import com.codingcat.changelogs.command.BrigadierCommandNode;
+import com.codingcat.changelogs.command.DialogSubCommands;
 import com.codingcat.changelogs.config.PluginConfig;
 import com.codingcat.changelogs.data.ChangelogStorage;
 import com.codingcat.changelogs.dialog.IDialog;
@@ -86,6 +87,8 @@ public final class ServerChangelogs extends JavaPlugin {
                     }).build();
             BrigadierCommandNode.SUB_COMMANDS.forEach(c -> rootNode.addChild(c.build(this)));
             commands.registrar().register(rootNode, Set.of("changelogs", "scl"));
+            if (this.config.registerDedicatedCommand())
+                commands.registrar().register(DialogSubCommands.buildDedicatedChangelogCommand(this));
         });
     }
 

@@ -50,4 +50,8 @@ public class PluginConfig extends YamlConfiguration {
         return DateTimeFormatter.ofPattern(getString("date_format", "----"))
                 .withZone(ZoneId.of(getString("date_timezone", "UTC")));
     }
+
+    public boolean registerDedicatedCommand() {
+        return getBoolean("register_dedicated_command", true);
+    }
 }

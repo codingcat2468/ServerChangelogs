@@ -45,7 +45,12 @@ public interface IDialog {
         public void recreate() {
             this.dialogSet.clear();
             this.dialogSet.add(new CreateChangelogDialog(plugin.getChangelogStorage()));
-            this.dialogSet.add(new ChangelogDialog(plugin.getChangelogStorage(), plugin.pluginConfig().getDateFormatter()));
+            this.dialogSet.add(new ChangelogDialog(
+                    plugin.getChangelogStorage(),
+                    plugin.pluginConfig().getDateFormatter(),
+                    plugin.pluginConfig().showChangelogHeader(),
+                    plugin.pluginConfig().createChangelogHeaderStack()
+            ));
         }
 
         public <T extends IDialog> @NotNull T getFromType(@NotNull Class<T> cls) throws IllegalArgumentException {

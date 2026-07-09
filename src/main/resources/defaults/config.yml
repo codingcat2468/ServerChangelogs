@@ -29,3 +29,16 @@ date_timezone: "UTC"
 # where they don't have to type "/changelogs view".
 # NOTE: Changing this setting requires a restart of your server!
 register_dedicated_command: true
+
+# Whether to add a header section to the changelog dialog that will show
+# above the actual changelogs. This can be used to give players a bit of context,
+# or link to e.g. a discord to give feedback, follow announcements, etc.
+# The actual content of this header can be changed in the language files!
+dialog_header: true
+
+# The item that will be shown next to the header of the dialog.
+# This can be set to null or entirely removed to not show any item there.
+# Items can be specified in the same format as the /give command,
+# including additional components (e.g. custom textures)!
+# Example: "minecraft:paper[minecraft:item_model='my_resourcepack:newspaper_item']"
+dialog_header_item: "minecraft:written_book"

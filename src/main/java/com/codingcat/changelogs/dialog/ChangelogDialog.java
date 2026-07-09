@@ -7,13 +7,17 @@ import io.papermc.paper.dialog.DialogResponseView;
 import io.papermc.paper.registry.data.dialog.ActionButton;
 import io.papermc.paper.registry.data.dialog.DialogBase;
 import io.papermc.paper.registry.data.dialog.body.DialogBody;
+import io.papermc.paper.registry.data.dialog.body.PlainMessageDialogBody;
 import io.papermc.paper.registry.data.dialog.type.DialogType;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,17 +29,24 @@ import static net.kyori.adventure.text.Component.text;
 public class ChangelogDialog implements IDialog {
     private final @NotNull ChangelogStorage storage;
     private final @NotNull DateTimeFormatter dateFormatter;
+    private final boolean addHeader;
+    private final @Nullable ItemStack headerItem;
 
     @Override
     public @NotNull Dialog build(@NotNull Player p) {
         Component authorNull = translatableManual(p, "dialog.changelog.unspecified_author");
-        List<? extends DialogBody> body = this.storage.listEntries()
+        List<DialogBody> body = this.storage.listEntries()
                 .reversed().stream()
                 .map(e -> translatableManual(p, "dialog.changelog.entry",
                         text(dateFormatter.format(e.recordedAt())), createLinesComponent(p, e), Objects.requireNonNullElse(e.author(), authorNull)))
-                .map(c -> DialogBody.plainMessage(c, 440))
+                .map(c -> (DialogBody) DialogBody.plainMessage(c, 440))
                 .toList();
-        if (body.isEmpty()) body = List.of(DialogBody.plainMessage(translatableManual(p, "dialog.changelog.empty")));
+        if (body.isEmpty()) body = List.of(DialogBody.plainMessage(translatableManual(p, "dialog.changelog.empty"), 350));
+        if (this.addHeader) {
+            body = new ArrayList<>(body);
+            PlainMessageDialogBody headerBody = DialogBody.plainMessage(translatableManual(p, "dialog.changelog.header"), 260);
+            body.addFirst(headerItem != null ? DialogBody.item(headerItem, headerBody, false, false, 17, 17) : headerBody);
+        }
         final List<? extends DialogBody> finalBody = body;
         return Dialog.create(b -> b.empty()
                 .type(DialogType.notice(

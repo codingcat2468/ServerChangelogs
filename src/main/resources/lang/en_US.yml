@@ -43,7 +43,14 @@ dialog:
       <reset><arg:1>
       
       <reset><gray>Published by <white><arg:2></white></gray>
+    entry_unread: |-
+      <red><b><strikethrough>                         <reset> <sprite:gui:icon/unseen_notification> <gradient:green:red><u>Changelog from <arg:0></u></gradient> <sprite:gui:icon/unseen_notification> <red><b><strikethrough>                         
+      
+      <reset><arg:1>
+      
+      <reset><gray>Published by <white><arg:2></white></gray>
     entry_line: "<gray>- <reset><arg:0>"
     unspecified_author: "<dark_red>Unspecified"
     button:
       close: "<sprite:gui:icon/checkmark> <green>Exit"
+    read: "<prefix><sprite:gui:icon/checkmark> <green>Marked <yellow><arg:0></yellow> entries as read!"

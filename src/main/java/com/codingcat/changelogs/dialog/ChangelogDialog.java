@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.codingcat.changelogs.lang.TranslationSource.translatable;
 import static com.codingcat.changelogs.lang.TranslationSource.translatableManual;
 import static net.kyori.adventure.text.Component.text;
 
@@ -37,7 +38,7 @@ public class ChangelogDialog implements IDialog {
         Component authorNull = translatableManual(p, "dialog.changelog.unspecified_author");
         List<DialogBody> body = this.storage.listEntries()
                 .reversed().stream()
-                .map(e -> translatableManual(p, "dialog.changelog.entry",
+                .map(e -> translatableManual(p, "dialog.changelog.entry" + (!e.hasRead(p) ? "_unread" : ""),
                         text(dateFormatter.format(e.recordedAt())), createLinesComponent(p, e), Objects.requireNonNullElse(e.author(), authorNull)))
                 .map(c -> (DialogBody) DialogBody.plainMessage(c, 440))
                 .toList();
@@ -50,7 +51,7 @@ public class ChangelogDialog implements IDialog {
         final List<? extends DialogBody> finalBody = body;
         return Dialog.create(b -> b.empty()
                 .type(DialogType.notice(
-                        ActionButton.builder(translatableManual(p, "dialog.changelog.button.close")).width(60).build()
+                        ActionButton.builder(translatableManual(p, "dialog.changelog.button.close")).width(60).action(action("close")).build()
                 ))
                 .base(DialogBase.builder(translatableManual(p, "dialog.changelog.title"))
                         .body(finalBody)
@@ -74,5 +75,13 @@ public class ChangelogDialog implements IDialog {
 
     @Override
     public void onActionTriggered(@NotNull String action, @NotNull DialogResponseView data, @NotNull Player source) {
+        if (!action.equals("close")) return;
+        List<Integer> uids = this.storage.listEntries()
+                .stream()
+                .filter(e -> !e.hasRead(source))
+                .map(ChangelogEntry::uid)
+                .toList();
+        uids.forEach(uid -> storage.markAsRead(uid, source.getUniqueId()));
+        if (!uids.isEmpty()) source.sendMessage(translatable("dialog.changelog.read", text(uids.size())));
     }
 }

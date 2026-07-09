@@ -5,6 +5,7 @@ import com.codingcat.changelogs.command.DialogSubCommands;
 import com.codingcat.changelogs.config.PluginConfig;
 import com.codingcat.changelogs.data.ChangelogStorage;
 import com.codingcat.changelogs.dialog.IDialog;
+import com.codingcat.changelogs.event.ChangelogJoinListener;
 import com.codingcat.changelogs.lang.TranslationSource;
 import com.codingcat.changelogs.util.ResourceUtil;
 import com.mojang.brigadier.Command;
@@ -79,6 +80,7 @@ public final class ServerChangelogs extends JavaPlugin {
         this.changelogStorage.init();
         this.dialogHolder = new IDialog.Holder(this);
         this.dialogHolder.recreate();
+        getServer().getPluginManager().registerEvents(new ChangelogJoinListener(this::getChangelogStorage, dialogHolder), this);
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
             LiteralCommandNode<CommandSourceStack> rootNode = Commands.literal(NAMESPACE)
                     .executes(ctx -> {

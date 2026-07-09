@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class YamlChangelogStorage implements ChangelogStorage {
@@ -96,8 +97,10 @@ public class YamlChangelogStorage implements ChangelogStorage {
                 .map(GsonComponentSerializer.gson()::deserialize)
                 .orElse(null);
         //noinspection unchecked
-        List<UUID> uuids = (List<UUID>) data.get("playersRead");
-        return new ChangelogEntry(uid, lines, recordedAt, author, new HashSet<>(uuids));
+        Set<UUID> playersRead = ((List<String>) data.get("playersRead"))
+                .stream().map(UUID::fromString)
+                .collect(Collectors.toSet());
+        return new ChangelogEntry(uid, lines, recordedAt, author, playersRead);
     }
 
     private @NotNull Map<String, Object> serializeEntry(@NotNull ChangelogEntry entry) {
@@ -112,7 +115,9 @@ public class YamlChangelogStorage implements ChangelogStorage {
                 .map(GsonComponentSerializer.gson()::serialize)
                 .orElse(null);
         data.put("author", serializedAuthor);
-        data.put("playersRead", new ArrayList<>(entry.playersRead()));
+        List<String> rawPlayersRead = entry.playersRead()
+                .stream().map(UUID::toString).toList();
+        data.put("playersRead", rawPlayersRead);
         return data;
     }
 

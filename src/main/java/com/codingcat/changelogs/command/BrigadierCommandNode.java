@@ -7,8 +7,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
-public interface BrigadierSubCommand {
-    @NotNull Set<BrigadierSubCommand> COMMANDS = DialogSubCommands.withDialogs(new ReloadSubCommand());
+public interface BrigadierCommandNode {
+    @NotNull Set<BrigadierCommandNode> SUB_COMMANDS = DialogSubCommands.withDialogs(new ReloadSubCommand());
 
     @NotNull LiteralCommandNode<CommandSourceStack> build(@NotNull ServerChangelogs plugin);
 }

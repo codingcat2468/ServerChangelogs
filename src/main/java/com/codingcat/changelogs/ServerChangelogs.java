@@ -1,6 +1,6 @@
 package com.codingcat.changelogs;
 
-import com.codingcat.changelogs.command.BrigadierSubCommand;
+import com.codingcat.changelogs.command.BrigadierCommandNode;
 import com.codingcat.changelogs.config.PluginConfig;
 import com.codingcat.changelogs.data.ChangelogStorage;
 import com.codingcat.changelogs.dialog.IDialog;
@@ -84,7 +84,7 @@ public final class ServerChangelogs extends JavaPlugin {
                         ctx.getSource().getSender().sendMessage(translatable("command.root"));
                         return Command.SINGLE_SUCCESS;
                     }).build();
-            BrigadierSubCommand.COMMANDS.forEach(c -> rootNode.addChild(c.build(this)));
+            BrigadierCommandNode.SUB_COMMANDS.forEach(c -> rootNode.addChild(c.build(this)));
             commands.registrar().register(rootNode, Set.of("changelogs", "scl"));
         });
     }

@@ -19,8 +19,8 @@ import static com.codingcat.changelogs.lang.TranslationSource.translatable;
 import static io.papermc.paper.command.brigadier.Commands.literal;
 
 public class DialogSubCommands {
-    public static @NotNull Set<BrigadierSubCommand> withDialogs(@NotNull BrigadierSubCommand... commands) {
-        Set<BrigadierSubCommand> commandSet = new HashSet<>();
+    public static @NotNull Set<BrigadierCommandNode> withDialogs(@NotNull BrigadierCommandNode... commands) {
+        Set<BrigadierCommandNode> commandSet = new HashSet<>();
         commandSet.add(new Command("create", CreateChangelogDialog.class));
         commandSet.add(new Command("view", ChangelogDialog.class));
         commandSet.addAll(Arrays.stream(commands).toList());
@@ -28,7 +28,7 @@ public class DialogSubCommands {
     }
 
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-    private static class Command implements BrigadierSubCommand {
+    private static class Command implements BrigadierCommandNode {
         private final @NotNull String name;
         private final @NotNull Class<? extends IDialog> dialogCls;
 

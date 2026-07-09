@@ -15,7 +15,7 @@ import static com.codingcat.changelogs.ServerChangelogs.error;
 import static io.papermc.paper.command.brigadier.Commands.literal;
 import static net.kyori.adventure.text.Component.text;
 
-public class ReloadSubCommand implements BrigadierSubCommand {
+public class ReloadSubCommand implements BrigadierCommandNode {
     @Override
     public @NotNull LiteralCommandNode<CommandSourceStack> build(@NotNull ServerChangelogs plugin) {
         return literal("reload").executes(ctx -> {

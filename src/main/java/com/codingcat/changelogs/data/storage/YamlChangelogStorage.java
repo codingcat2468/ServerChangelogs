@@ -49,7 +49,10 @@ public class YamlChangelogStorage implements ChangelogStorage {
     @Override
     public boolean removeEntry(int uid) {
         boolean success = this.cache.removeIf(e -> e.uid() == uid);
-        if (success) this.save();
+        if (success) {
+            this.fixEntryUIDs();
+            this.save();
+        }
         return success;
     }
 
@@ -129,6 +132,25 @@ public class YamlChangelogStorage implements ChangelogStorage {
     @Override
     public int nextUID() {
         return this.cache.size();
+    }
+
+    /**
+     * Fix the UIDs of cache entries desyncing from their actual
+     * position in the list when {@link #removeEntry(int)} is called.
+     * This re-creates the entire cache including all of its entries.
+     */
+    private void fixEntryUIDs() {
+        List<ChangelogEntry> entries = new ArrayList<>(this.cache);
+        this.cache.clear();
+        for (int i = 0; i < entries.size(); i++) {
+            ChangelogEntry original = entries.get(i);
+            this.cache.add(new ChangelogEntry(
+                    i, original.lines(),
+                    original.recordedAt(),
+                    original.author(),
+                    original.playersRead()
+            ));
+        }
     }
 
     @Override

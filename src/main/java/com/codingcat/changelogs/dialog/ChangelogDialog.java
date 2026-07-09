@@ -35,12 +35,14 @@ public class ChangelogDialog implements IDialog {
                         text(dateFormatter.format(e.recordedAt())), createLinesComponent(p, e), Objects.requireNonNullElse(e.author(), authorNull)))
                 .map(c -> DialogBody.plainMessage(c, 440))
                 .toList();
+        if (body.isEmpty()) body = List.of(DialogBody.plainMessage(translatableManual(p, "dialog.changelog.empty")));
+        final List<? extends DialogBody> finalBody = body;
         return Dialog.create(b -> b.empty()
                 .type(DialogType.notice(
                         ActionButton.builder(translatableManual(p, "dialog.changelog.button.close")).width(60).build()
                 ))
                 .base(DialogBase.builder(translatableManual(p, "dialog.changelog.title"))
-                        .body(body)
+                        .body(finalBody)
                         .canCloseWithEscape(true)
                         .afterAction(DialogBase.DialogAfterAction.CLOSE)
                         .build()

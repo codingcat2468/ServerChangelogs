@@ -33,6 +33,7 @@ dialog:
       content_empty: "<prefix><red>Please specify at least one changelog line"
   changelog:
     title: "<gradient:#a366ff:#9999ff><b>Server Changelog"
+    empty: "<red>There are no changelogs yet, the server must've just released!"
     entry: |-
       <dark_gray><strikethrough>                            <reset> <gradient:green:red><u>Changelog from <arg:0></u></gradient> <dark_gray><strikethrough>                            
       

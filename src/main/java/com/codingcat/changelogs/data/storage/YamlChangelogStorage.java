@@ -92,7 +92,9 @@ public class YamlChangelogStorage implements ChangelogStorage {
         Component author = Optional.ofNullable((String) data.get("author"))
                 .map(GsonComponentSerializer.gson()::deserialize)
                 .orElse(null);
-        return new ChangelogEntry(uid, lines, recordedAt, author);
+        //noinspection unchecked
+        List<UUID> uuids = (List<UUID>) data.get("playersRead");
+        return new ChangelogEntry(uid, lines, recordedAt, author, new HashSet<>(uuids));
     }
 
     private @NotNull Map<String, Object> serializeEntry(@NotNull ChangelogEntry entry) {
@@ -107,12 +109,21 @@ public class YamlChangelogStorage implements ChangelogStorage {
                 .map(GsonComponentSerializer.gson()::serialize)
                 .orElse(null);
         data.put("author", serializedAuthor);
+        data.put("playersRead", new ArrayList<>(entry.playersRead()));
         return data;
     }
 
     @Override
     public @NotNull List<ChangelogEntry> listEntries() {
         return this.cache;
+    }
+
+    @Override
+    public void markAsRead(int uid, @NotNull UUID player) {
+        this.cache.stream()
+                .filter(e -> e.uid() == uid)
+                .forEach(e -> e.playersRead().add(player));
+        this.save();
     }
 
     @Override

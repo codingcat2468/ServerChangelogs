@@ -5,6 +5,7 @@ import com.codingcat.changelogs.data.storage.YamlChangelogStorage;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface ChangelogStorage {
     void init();
@@ -16,6 +17,8 @@ public interface ChangelogStorage {
     boolean removeEntry(int uid);
 
     @NotNull List<ChangelogEntry> listEntries();
+
+    void markAsRead(int uid, @NotNull UUID player);
 
     int nextUID();
 

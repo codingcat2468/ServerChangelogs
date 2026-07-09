@@ -19,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -72,7 +73,8 @@ public class CreateChangelogDialog implements IDialog {
         ChangelogEntry entry = new ChangelogEntry(
                 this.storage.nextUID(),
                 lines, Instant.now(),
-                !author.isBlank() ? MiniMessage.miniMessage().deserialize(author) : null
+                !author.isBlank() ? MiniMessage.miniMessage().deserialize(author) : null,
+                new HashSet<>()
         );
         this.storage.storeEntry(entry);
         source.sendMessage(translatable("dialog.create.success"));

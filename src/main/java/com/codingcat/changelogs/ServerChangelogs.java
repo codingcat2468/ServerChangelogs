@@ -33,6 +33,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
+import static com.codingcat.changelogs.command.BrigadierCommandNode.requirePermission;
 import static com.codingcat.changelogs.lang.TranslationSource.translatable;
 import static net.kyori.adventure.text.Component.text;
 
@@ -83,6 +84,7 @@ public final class ServerChangelogs extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ChangelogJoinListener(this::getChangelogStorage, dialogHolder), this);
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
             LiteralCommandNode<CommandSourceStack> rootNode = Commands.literal(NAMESPACE)
+                    .requires(requirePermission("command"))
                     .executes(ctx -> {
                         ctx.getSource().getSender().sendMessage(translatable("command.root"));
                         return Command.SINGLE_SUCCESS;

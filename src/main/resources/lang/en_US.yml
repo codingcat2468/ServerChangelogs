@@ -31,6 +31,7 @@ dialog:
     success: "<prefix><sprite:gui:icon/checkmark> <green>Successfully published a new changelog!"
     error:
       content_empty: "<prefix><red>Please specify at least one changelog line"
+      no_permission: "<prefix><red>You don't have permission to create changelogs"
   changelog:
     title: "<sprite:gui:icon/news> <gradient:#a366ff:#9999ff><b>Server Changelog"
     header: |-

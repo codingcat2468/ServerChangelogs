@@ -21,31 +21,34 @@ import static io.papermc.paper.command.brigadier.Commands.literal;
 public class DialogSubCommands {
     public static @NotNull Set<BrigadierCommandNode> withDialogs(@NotNull BrigadierCommandNode... commands) {
         Set<BrigadierCommandNode> commandSet = new HashSet<>();
-        commandSet.add(new Command("create", CreateChangelogDialog.class));
-        commandSet.add(new Command("view", ChangelogDialog.class));
+        commandSet.add(new Command("create", "command.create", CreateChangelogDialog.class));
+        commandSet.add(new Command("view", "command.view", ChangelogDialog.class));
         commandSet.addAll(Arrays.stream(commands).toList());
         return commandSet;
     }
 
     public static @NotNull LiteralCommandNode<CommandSourceStack> buildDedicatedChangelogCommand(@NotNull ServerChangelogs plugin) {
-        return new Command("changelog", ChangelogDialog.class).build(plugin);
+        return new Command("changelog", "dedicated_command", ChangelogDialog.class).build(plugin);
     }
 
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     private static class Command implements BrigadierCommandNode {
         private final @NotNull String name;
+        private final @NotNull String permission;
         private final @NotNull Class<? extends IDialog> dialogCls;
 
         @Override
         public @NotNull LiteralCommandNode<CommandSourceStack> build(@NotNull ServerChangelogs plugin) {
-            return literal(this.name).executes(ctx -> {
-                if (!(ctx.getSource().getSender() instanceof Player player)) {
-                    ctx.getSource().getSender().sendMessage(translatable("command.onlyplayer"));
-                    return com.mojang.brigadier.Command.SINGLE_SUCCESS;
-                }
-                plugin.getDialogHolder().getFromType(this.dialogCls).showTo(player);
-                return com.mojang.brigadier.Command.SINGLE_SUCCESS;
-            }).build();
+            return literal(this.name)
+                    .requires(BrigadierCommandNode.requirePermission(this.permission))
+                    .executes(ctx -> {
+                        if (!(ctx.getSource().getSender() instanceof Player player)) {
+                            ctx.getSource().getSender().sendMessage(translatable("command.onlyplayer"));
+                            return com.mojang.brigadier.Command.SINGLE_SUCCESS;
+                        }
+                        plugin.getDialogHolder().getFromType(this.dialogCls).showTo(player);
+                        return com.mojang.brigadier.Command.SINGLE_SUCCESS;
+                    }).build();
         }
     }
 }

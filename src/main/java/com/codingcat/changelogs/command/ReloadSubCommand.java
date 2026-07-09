@@ -18,21 +18,23 @@ import static net.kyori.adventure.text.Component.text;
 public class ReloadSubCommand implements BrigadierCommandNode {
     @Override
     public @NotNull LiteralCommandNode<CommandSourceStack> build(@NotNull ServerChangelogs plugin) {
-        return literal("reload").executes(ctx -> {
-            long time = System.currentTimeMillis();
-            Component errorMsg = null;
-            try {
-                plugin.reload();
-                long took = System.currentTimeMillis() - time;
-                ctx.getSource().getSender().sendMessage(translatable("command.reload.success", text(took)));
-            } catch (IOException e) {
-                errorMsg = translatable("command.reload.error.io");
-                error("command.reload.error.details", e);
-            } catch (InvalidConfigurationException e) {
-                errorMsg = translatable("command.reload.error.invalid", text(e.getMessage()));
-            }
-            if (errorMsg != null) ctx.getSource().getSender().sendMessage(errorMsg);
-            return Command.SINGLE_SUCCESS;
-        }).build();
+        return literal("reload")
+                .requires(BrigadierCommandNode.requirePermission("command.reload"))
+                .executes(ctx -> {
+                    long time = System.currentTimeMillis();
+                    Component errorMsg = null;
+                    try {
+                        plugin.reload();
+                        long took = System.currentTimeMillis() - time;
+                        ctx.getSource().getSender().sendMessage(translatable("command.reload.success", text(took)));
+                    } catch (IOException e) {
+                        errorMsg = translatable("command.reload.error.io");
+                        error("command.reload.error.details", e);
+                    } catch (InvalidConfigurationException e) {
+                        errorMsg = translatable("command.reload.error.invalid", text(e.getMessage()));
+                    }
+                    if (errorMsg != null) ctx.getSource().getSender().sendMessage(errorMsg);
+                    return Command.SINGLE_SUCCESS;
+                }).build();
     }
 }

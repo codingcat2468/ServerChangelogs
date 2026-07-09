@@ -1,5 +1,6 @@
 package com.codingcat.changelogs.dialog;
 
+import com.codingcat.changelogs.ServerChangelogs;
 import com.codingcat.changelogs.data.ChangelogEntry;
 import com.codingcat.changelogs.data.ChangelogStorage;
 import io.papermc.paper.dialog.Dialog;
@@ -61,6 +62,10 @@ public class CreateChangelogDialog implements IDialog {
     @Override
     public void onActionTriggered(@NotNull String action, @NotNull DialogResponseView data, @NotNull Player source) {
         if (!action.equals("publish")) return;
+        if (!source.hasPermission(ServerChangelogs.NAMESPACE + ".command.create")) {
+            source.sendMessage(translatable("dialog.create.error.no_permission"));
+            return;
+        }
         List<Component> lines = Objects.requireNonNull(data.getText("contents"))
                 .lines()
                 .map(MiniMessage.miniMessage()::deserialize)

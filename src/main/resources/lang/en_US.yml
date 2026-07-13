@@ -1,11 +1,15 @@
-plugin_name: "<gradient:#a366ff:#9999ff><b><plugin:name>"
-prefix: "<translate:plugin_name><reset><dark_gray> » <reset>"
-console:
+# The <click:open_url:...> part below makes it so that clicking on the plugin's name anywhere
+# (including the prefix) will open the modrinth page! If you don't want this, you can uncomment the version
+# below the current one (remove the #) and comment out the current version (add a # in front of it).
+plugin_name: "<click:open_url:https://modrinth.com/project/server-changelogs><gradient:#a366ff:#9999ff><b><plugin:name>"
+#plugin_name: "<gradient:#a366ff:#9999ff><b><plugin:name>"
+prefix: "<translate:plugin_name><reset><dark_gray> » <reset>" # The plugin prefix, can be used with <prefix>
+console: # Translations for most messages the plugin will send in the server's console
   startup: "Starting <translate:plugin_name> <gray>v<plugin:version></gray> by <aqua><plugin:authors></aqua>"
   startup_storage: "Initializing <green>\"<arg:0>\"</green> changelog storage..."
   reload: "<aqua>Reloading plugin..."
   shutdown: "<red>Shutting down, bye!"
-command:
+command: # Translations for the plugin's commands
   onlyplayer: "<prefix><red>This command can only be executed by a player"
   root: |-
     <dark_gray><strikethrough>              <reset> <translate:plugin_name> <gray>v<plugin:version></gray> <dark_gray><strikethrough>              
@@ -17,9 +21,9 @@ command:
       io: "<prefix><red>An unexpected I/O error occurred while trying to reload, check the console for more details!"
       details: "<red>Details for unexpected reload error:"
       invalid: "<prefix><red>Invalid configuration: <yellow><arg:0>"
-dialog:
+dialog: # Translations for the plugin's dialog UIs
   error: "<red>An unexpected error occurred while trying to process a dialog action:"
-  create:
+  create: # The UI used to publish a new changelog
     title: "<gradient:#a366ff:#9999ff><b>Create Changelog"
     subtitle: "This action will <green>create</green> a new changelog entry <aqua>#<arg:0>"
     input:
@@ -32,12 +36,18 @@ dialog:
     error:
       content_empty: "<prefix><red>Please specify at least one changelog line"
       no_permission: "<prefix><red>You don't have permission to create changelogs"
-  changelog:
+  changelog: # The UI used by players to view the server's changelogs
     title: "<sprite:gui:icon/news> <gradient:#a366ff:#9999ff><b>Server Changelog"
     header: |-
       This menu shows you an overview of <green>what has changed</green> on our server recently!
       New server changes will appear <red>in red</red>.
     empty: "<red>There are no changelogs yet, the server must've just released!"
+    # "entry" is used to define the format for a normal changelog entry, while "entry_unread" is
+    # used to format changelog entries the player hasn't read yet (parts are formatted bigger and in red)!
+    # The following arguments are provided:
+    #  <arg:0>: The changelog's publication date/time, the format of this can be changed in "config.yml"!
+    #  <arg:1>: The actual content/lines of the changelog, already formatted using "entry_line" (see below)
+    #  <arg:2>: The (formatted) author of the changelog
     entry: |-
       <dark_gray><strikethrough>                            <reset> <gradient:green:red><u>Changelog from <arg:0></u></gradient> <dark_gray><strikethrough>                            
       
@@ -50,8 +60,8 @@ dialog:
       <reset><arg:1>
       
       <reset><gray>Published by <white><arg:2></white></gray>
-    entry_line: "<gray>- <reset><arg:0>"
-    unspecified_author: "<dark_red>Unspecified"
+    entry_line: "<gray>- <reset><arg:0>" # The format for a single changelog line (adds a gray dash in front)
+    unspecified_author: "<dark_red>Unspecified" # The author that will be shown when this field was left empty during publishing
     button:
       close: "<sprite:gui:icon/checkmark> <green>Exit"
     read: "<prefix><sprite:gui:icon/checkmark> <green>Marked <yellow><arg:0></yellow> entries as read!"

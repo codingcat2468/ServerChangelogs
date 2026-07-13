@@ -16,7 +16,7 @@ dependencies {
 
 paperPluginYaml {
     main = "${group}.changelogs.ServerChangelogs"
-    apiVersion = "26.1.2"
+    apiVersion = "26.1"
 
     authors.addAll("codingcat2468")
 }

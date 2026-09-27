@@ -2,6 +2,7 @@ package com.codingcat.changelogs.base.dialog.ui.editor;
 
 import com.codingcat.changelogs.base.data.ChangelogEntry;
 import com.codingcat.changelogs.base.data.ChangelogStorage;
+import com.codingcat.changelogs.base.util.LegacyColorTranslator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -37,12 +38,13 @@ public abstract class EditorSession {
 
     public @NotNull @Unmodifiable List<Component> deserializeLines() {
         return getRawLines().stream()
+                .map(LegacyColorTranslator::translate)
                 .map(MiniMessage.miniMessage()::deserialize)
                 .toList();
     }
 
     public @Nullable Component deserializeAuthor() {
-        return !author.isBlank() ? MiniMessage.miniMessage().deserialize(getAuthor()) : null;
+        return !author.isBlank() ? MiniMessage.miniMessage().deserialize(LegacyColorTranslator.translate(getAuthor())) : null;
     }
 
     public static class Create extends EditorSession {

@@ -27,6 +27,8 @@ Currently, the plugin supports the following features:
 - [**MiniMessage**](https://docs.papermc.io/adventure/minimessage/format/) support for **creating changelogs**
 - A **completely customizable** changelog screen
 - Customizable **translations** based on the player's **client language**
+- Optional support for **legacy `&`-based color/formatting codes** (e.g. `&a`, `&l`, `&r`) alongside MiniMessage
+- **Pre-defined authors**, configurable in `config.yml`, that can be quick-selected in the editor dialog
 
 ## Supported Server Software & Versions
 ServerChangelogs is currently available as:
@@ -114,7 +116,7 @@ ServerChangelogs was originally made for a **smaller minecraft server** I'm a pa
 
 The roadmap below contains some of the features that I'm **planning to add** in the future:
 - [ ] **JDBC (relational) database support**: Currently, the plugin stores all changelog data (including who has already seen what changelogs) in a plain YAML file. The reason for this mostly comes down to  the stuff above (we wanted a solution fast), so we didn't prioritize storage. This does start to cause problems over time, since the amount of data that has to be (de-)serialized for each startup/write operation increases by a lot! A proper implementation would also have to consider things like auto-migration from the existing YAML files.
-- [ ] **Pre-defined authors**: Rather than having to enter the name of the changelog's author every time (possibly including formatting), there could be a list of pre-defined authors in the plugin config that a user could choose from.
+- [x] **Pre-defined authors**: Rather than having to enter the name of the changelog's author every time (possibly including formatting), there could be a list of pre-defined authors in the plugin config that a user could choose from.
 - [ ] **Customizable changelog dialog layout**: Currently, the changelog dialog always shows all previous changelogs, with unread ones marked red. In the future, it'd be nice to have an option for this, e.g. so players on join could also only see the most recent changelog.
 - [ ] **Paged changelogs**: At the moment, all existing changelogs are just added to the dialog without any additional checks. While this is fine with just a few of them, it could quickly become an issue with a long history of changelogs. So adding a page system with a configurable amount of changelogs per page would be great!
 - [ ] **Player first-join storage**: Right now, changelogs are just displayed to players upon joining whenever they haven't read them (except for the **first time** a player joins a server). This can be very confusing to new-ish players, since they weren't there for all the previous changes to begin with! A possible (while not 100% perfect) solution to this would be storing when the player initially joined the server / was first seen by the plugin, to then only display relevant changelogs to them.

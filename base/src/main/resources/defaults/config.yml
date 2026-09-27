@@ -57,6 +57,21 @@ dialog_header: true
 # Example: "minecraft:paper[minecraft:item_model='my_resourcepack:newspaper_item']"
 dialog_header_item: "minecraft:written_book"
 
+# Whether legacy "&"-based color/formatting codes (e.g. &a, &l, &r) should automatically
+# be translated into their MiniMessage equivalent when writing changelog lines/authors.
+# This is purely additive - regular MiniMessage tags can still be used at the same time.
+# Disable this if you don't want "&" to be treated as a formatting character.
+legacy_color_codes: true
+
+# A list of pre-defined authors that can be quickly selected when creating/editing a
+# changelog in the editor dialog, instead of having to type one out (with formatting) every time.
+# Entries support MiniMessage formatting, just like the "author" input field itself.
+# Leave this empty to not show any quick-select options.
+predefined_authors: []
+#predefined_authors:
+#  - "<green><b>Notch"
+#  - "<aqua>Admin Team"
+
 # -- DO NOT MODIFY UNLESS YOU KNOW WHAT YOU ARE DOING --
 # Manually enable workarounds/fixes for certain bugs in e.g. PacketEvents
 # that normally don't apply to the current version

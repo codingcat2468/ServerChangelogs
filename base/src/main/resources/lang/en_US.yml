@@ -64,6 +64,9 @@ dialog: # Translations for the plugin's dialog UIs
     input:
       contents: "Line Content"
       author: "Author <gray>(optional)</gray>"
+    predefined_authors:
+      label: "<translate:icon.info> <gray>Quick-select author: <arg:0>"
+      entry: "<dark_gray>[<hover:show_text:'<gray>Click to use this author'><arg:0></hover>]"
     button:
       add_line: "<translate:icon.speech_bubble> <green><b>Add Line"
       edit_line: "<translate:icon.confirm> <light_purple><b>Edit Line"

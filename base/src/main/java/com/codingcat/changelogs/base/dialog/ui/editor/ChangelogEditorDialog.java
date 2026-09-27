@@ -30,6 +30,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,6 +54,7 @@ public class ChangelogEditorDialog implements IDialog {
     private final @Getter String id = "changelog_editor";
     private final @NotNull ChangelogStorage storage;
     private final boolean useFallbackPermissions;
+    private final @NotNull List<String> predefinedAuthors;
 
     @Override
     public @NotNull Dialog build(@NotNull IPlayer p, @NotNull DialogSessionManager sessionManager) {
@@ -85,14 +87,14 @@ public class ChangelogEditorDialog implements IDialog {
                 new PlainMessage(translatableManual(p, sessionTranslation + ".subtitle", text(session.getEntryUID() + 1)), 160),
                 false, false, 15, 15);
         PacketEventsFix.fixItemBody(itemBody);
-        List<DialogBody> body = List.of(itemBody,
+        List<DialogBody> body = new ArrayList<>(List.of(itemBody,
                 new PlainMessageDialogBody(new PlainMessage(translatableManual(p, "dialog.editor.hint"), ChangelogDialog.LINE_WIDTH)),
                 new PlainMessageDialogBody(new PlainMessage(!previewLines.isEmpty() ? createLinesComponent(p, lineMapper, previewLines) : translatableManual(p, "dialog.editor.empty_preview"), ChangelogDialog.LINE_WIDTH))
-        );
-        if (session.isShowRestoredMessage()) {
-            body = new ArrayList<>(body);
+        ));
+        if (session.isShowRestoredMessage())
             body.add(1, new PlainMessageDialogBody(new PlainMessage(translatableManual(p, "dialog.editor.restored_session"), 400)));
-        }
+        if (!predefinedAuthors.isEmpty())
+            body.add(new PlainMessageDialogBody(new PlainMessage(createPredefinedAuthorsComponent(p, sessionManager), ChangelogDialog.LINE_WIDTH)));
         List<Input> inputs = List.of(
                 new Input("line", new TextInputControl(350, translatableManual(p, "dialog.editor.input.contents"),
                         true, session.getCurrentLine(), 5000, null)),
@@ -109,6 +111,21 @@ public class ChangelogEditorDialog implements IDialog {
         buttons.add(new ActionButton(new CommonButtonData(translatableManual(p, "dialog.editor.button." + lineAction), null, 100), sessionManager.createSessionBasedAction(this, lineAction, true)));
         ActionButton closeBtn = new ActionButton(new CommonButtonData(translatableManual(p, "dialog.editor.button.close"), null, 100), sessionManager.createSessionBasedAction(this, "try_close", true));
         return new MultiActionDialog(common, buttons, closeBtn, 3);
+    }
+
+    private @NotNull Component createPredefinedAuthorsComponent(@NotNull IPlayer p, @NotNull DialogSessionManager sessionManager) {
+        String prefix = "dialog.editor.predefined_authors.";
+        Component entries = Component.empty();
+        for (int i = 0; i < predefinedAuthors.size(); i++) {
+            Component parsedAuthor = MiniMessage.miniMessage().deserialize(predefinedAuthors.get(i));
+            NBTCompound payload = new NBTCompound();
+            payload.setTag("author_index", new NBTInt(i));
+            Component entry = translatableManual(p, prefix + "entry", parsedAuthor)
+                    .clickEvent(sessionManager.createSessionBasedClickEvent(this, "select_predefined_author", payload));
+            entries = entries.append(entry);
+            if (i < predefinedAuthors.size() - 1) entries = entries.appendSpace();
+        }
+        return translatableManual(p, prefix + "label", entries);
     }
 
     private @NotNull Dialog buildConfirmCloseDialog(@NotNull IPlayer p, @NotNull DialogSessionManager sessionManager) {
@@ -177,6 +194,13 @@ public class ChangelogEditorDialog implements IDialog {
                     session.setEditingLineIndex(-1);
                 } else session.getRawLines().add(session.getCurrentLine());
                 session.setCurrentLine("");
+                this.showTo(source, sessionManager, DialogPackets.PacketPhase.PLAY);
+            }
+            case "select_predefined_author" -> {
+                if (data == null) return;
+                int authorIndex = data.getNumberTagValueOrThrow("author_index").intValue();
+                if (authorIndex < 0 || authorIndex >= predefinedAuthors.size()) return;
+                session.setAuthor(predefinedAuthors.get(authorIndex));
                 this.showTo(source, sessionManager, DialogPackets.PacketPhase.PLAY);
             }
             case "start_edit_line", "remove_line" -> {

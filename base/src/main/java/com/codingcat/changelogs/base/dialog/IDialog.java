@@ -44,7 +44,8 @@ public interface IDialog {
             this.dialogMap.clear();
             register.accept(new ChangelogEditorDialog(
                     plugin.getChangelogStorage(),
-                    plugin.pluginConfig().useNativeFallbackPermissions()
+                    plugin.pluginConfig().useNativeFallbackPermissions(),
+                    plugin.pluginConfig().getPredefinedAuthors()
             ));
             register.accept(new ChangelogDialog(
                     plugin.getChangelogStorage(), this,

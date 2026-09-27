@@ -49,6 +49,7 @@ public class PluginConfig extends Yaml {
             getDateFormatter();
             createChangelogHeaderStack();
             getEnabledManualWorkarounds();
+            getPredefinedAuthors();
             return null;
         } catch (Exception e) {
             return e.getMessage();
@@ -94,6 +95,14 @@ public class PluginConfig extends Yaml {
 
     public boolean useNativeFallbackPermissions() {
         return getBoolean("use_native_fallback_permissions", false);
+    }
+
+    public boolean useLegacyColorCodes() {
+        return getBoolean("legacy_color_codes", true);
+    }
+
+    public @NotNull List<String> getPredefinedAuthors() {
+        return getList("predefined_authors", String.class);
     }
 
     public @Nullable ItemStack createChangelogHeaderStack() {

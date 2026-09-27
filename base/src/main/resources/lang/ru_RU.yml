@@ -64,6 +64,9 @@ dialog: # Переводы диалоговых интерфейсов (UI) пл
     input:
       contents: "Текст строки"
       author: "Автор <gray>(необязательно)</gray>"
+    predefined_authors:
+      label: "<translate:icon.info> <gray>Быстрый выбор автора: <arg:0>"
+      entry: "<dark_gray>[<hover:show_text:'<gray>Нажмите, чтобы выбрать этого автора'><arg:0></hover>]"
     button:
       add_line: "<translate:icon.speech_bubble> <green><b>Добавить строку"
       edit_line: "<translate:icon.confirm> <light_purple><b>Изменить строку"

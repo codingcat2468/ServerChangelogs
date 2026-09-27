@@ -9,6 +9,7 @@ import com.codingcat.changelogs.base.dialog.DialogSessionManager;
 import com.codingcat.changelogs.base.dialog.IDialog;
 import com.codingcat.changelogs.base.event.ChangelogJoinListener;
 import com.codingcat.changelogs.base.lang.TranslationSource;
+import com.codingcat.changelogs.base.util.LegacyColorTranslator;
 import com.codingcat.changelogs.base.util.ResourceUtil;
 import com.codingcat.changelogs.platformapi.ChangelogsPlatform;
 import com.codingcat.changelogs.platformapi.Entrypoint;
@@ -58,16 +59,17 @@ public final class ServerChangelogs extends Entrypoint {
     public void onStart() {
         logger = getPlatform().getComponentLogger();
         Path translationPath = getPlatform().getDataPath().resolve("lang");
-        if (translationPath.toFile().mkdirs()) {
-            logger.info("Creating default translation files...");
-            ResourceUtil.readResourcesAsString("lang").forEach((fname, contents) -> {
-                try {
-                    Files.writeString(translationPath.resolve(fname), contents, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
-                } catch (IOException e) {
-                    logger.warn("Failed to create default translation file \"{}\":", fname, e);
-                }
-            });
-        }
+        translationPath.toFile().mkdirs();
+        ResourceUtil.readResourcesAsString("lang").forEach((fname, contents) -> {
+            Path targetFile = translationPath.resolve(fname);
+            if (targetFile.toFile().exists()) return;
+            logger.info("Creating missing default translation file \"{}\"...", fname);
+            try {
+                Files.writeString(targetFile, contents, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
+            } catch (IOException e) {
+                logger.warn("Failed to create default translation file \"{}\":", fname, e);
+            }
+        });
         this.translationSource = new TranslationSource(translationPath, getPlatform().getChangelogsMeta(), getPlatform().getPlatformMeta(), logger);
         this.translationSource.reload();
         info("console.startup");
@@ -83,6 +85,7 @@ public final class ServerChangelogs extends Entrypoint {
         }
         this.config = new PluginConfig(this, configPath);
         this.config.tryReload();
+        LegacyColorTranslator.setEnabled(this.config.useLegacyColorCodes());
         this.changelogStorage = this.config.createChangelogStorage();
         info("console.startup_storage", text(this.changelogStorage.getDisplayName()));
         this.changelogStorage.init();
@@ -111,6 +114,7 @@ public final class ServerChangelogs extends Entrypoint {
         this.config.reload();
         String err = this.config.validate();
         if (err != null) throw new YAMLException(err);
+        LegacyColorTranslator.setEnabled(this.config.useLegacyColorCodes());
         this.changelogStorage.shutdown();
         this.changelogStorage = this.config.createChangelogStorage();
         info("console.startup_storage", text(this.changelogStorage.getDisplayName()));

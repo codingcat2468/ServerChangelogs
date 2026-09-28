@@ -1,5 +1,6 @@
 package com.codingcat.changelogs.base.dialog.ui.editor;
 
+import com.codingcat.changelogs.api.ServerChangelogsApi;
 import com.codingcat.changelogs.base.data.ChangelogEntry;
 import com.codingcat.changelogs.base.data.ChangelogStorage;
 import lombok.Getter;
@@ -11,9 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 @Getter
@@ -27,7 +26,7 @@ public abstract class EditorSession {
     private @NotNull String author = "";
     private boolean showRestoredMessage = false;
 
-    abstract void commit(@NotNull ChangelogStorage storage) throws CommitException;
+    abstract void commit(@NotNull ChangelogStorage storage, @NotNull ServerChangelogsApi api) throws CommitException;
 
     public abstract @NotNull String getId();
 
@@ -51,16 +50,11 @@ public abstract class EditorSession {
         }
 
         @Override
-        public void commit(@NotNull ChangelogStorage storage) throws CommitException {
-            ChangelogEntry newEntry = new ChangelogEntry(
-                    getEntryUID(),
-                    this.deserializeLines(),
-                    Instant.now(),
-                    this.deserializeAuthor(),
-                    new HashSet<>()
-            );
+        public void commit(@NotNull ChangelogStorage storage, @NotNull ServerChangelogsApi api) throws CommitException {
             try {
-                storage.storeEntry(newEntry);
+                Component author = this.deserializeAuthor();
+                if (author == null) api.createChangelog(this.deserializeLines());
+                else api.createChangelog(this.deserializeLines(), author);
             } catch (Throwable e) {
                 throw new CommitException("internal_error");
             }
@@ -93,7 +87,7 @@ public abstract class EditorSession {
         }
 
         @Override
-        public void commit(@NotNull ChangelogStorage storage) throws CommitException {
+        public void commit(@NotNull ChangelogStorage storage, @NotNull ServerChangelogsApi api) throws CommitException {
             ChangelogEntry currentEntry = storage.getByUID(getEntryUID());
             if (currentEntry == null) throw new CommitException("entry_deleted");
             ChangelogEntry newEntry = new ChangelogEntry(

@@ -109,6 +109,12 @@ Those are **argument tags**, which contain specific text defined by the plugin (
 
 If multiple arguments are present in a certain translation, they can be identified by the number after the `:`.
 
+## Developer API
+
+ServerChangelogs provides a separately publishable, platform-neutral API for other plugins without exposing internal
+storage or platform-specific plugin classes. See the [complete API reference](api/README.md) for dependency setup,
+every method and return value, changelog data, events, subscriptions, lifecycle rules, and examples.
+
 ## Roadmap
 ServerChangelogs was originally made for a **smaller minecraft server** I'm a part of, to make players aware of changes without having to rely on e.g. **Discord**. Because we wanted this feature to be available pretty fast, the plugin initially won't have as many features as I'd like it to have.
 

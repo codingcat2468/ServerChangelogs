@@ -1,5 +1,7 @@
 package com.codingcat.changelogs.base;
 
+import com.codingcat.changelogs.api.ServerChangelogsApi;
+import com.codingcat.changelogs.base.api.ServerChangelogsApiImpl;
 import com.codingcat.changelogs.base.command.BrigadierCommandNode;
 import com.codingcat.changelogs.base.command.DialogSubCommands;
 import com.codingcat.changelogs.base.compat.PacketEventsFix;
@@ -49,6 +51,7 @@ public final class ServerChangelogs extends Entrypoint {
     private @Getter ChangelogStorage changelogStorage;
     private @Getter IDialog.Holder dialogHolder;
     private @Getter DialogSessionManager dialogSessionManager;
+    private ServerChangelogsApiImpl api;
 
     public ServerChangelogs(@NotNull ChangelogsPlatform platform) {
         super(platform);
@@ -86,6 +89,7 @@ public final class ServerChangelogs extends Entrypoint {
         this.changelogStorage = this.config.createChangelogStorage();
         info("console.startup_storage", text(this.changelogStorage.getDisplayName()));
         this.changelogStorage.init();
+        this.api = new ServerChangelogsApiImpl(this);
         PacketEventsFix.setManualWorkarounds(config.getEnabledManualWorkarounds(), logger);
         this.dialogHolder = new IDialog.Holder(this);
         this.dialogHolder.recreate();
@@ -94,6 +98,7 @@ public final class ServerChangelogs extends Entrypoint {
         this.joinListener = new ChangelogJoinListener(this::getChangelogStorage, dialogHolder, dialogSessionManager, config);
         this.joinListener.registerEvents(getPlatform().getEventManager());
         this.registerCommands(getPlatform().getCommandManager());
+        this.api.enable();
     }
 
     private void registerCommands(@NotNull ICommandManager commandManager) {
@@ -125,6 +130,7 @@ public final class ServerChangelogs extends Entrypoint {
     @Override
     public void onShutdown() {
         info("console.shutdown");
+        if (this.api != null) this.api.disable();
         if (this.dialogSessionManager != null) this.dialogSessionManager.unregisterEvents();
         if (this.joinListener != null) this.joinListener.unregisterEvents(getPlatform().getEventManager());
         if (this.changelogStorage != null) this.changelogStorage.shutdown();
@@ -132,6 +138,10 @@ public final class ServerChangelogs extends Entrypoint {
 
     public @NotNull PluginConfig pluginConfig() {
         return this.config;
+    }
+
+    public @NotNull ServerChangelogsApi getApi() {
+        return this.api;
     }
 
     public static void info(@NotNull String key, @NotNull ComponentLike... args) {

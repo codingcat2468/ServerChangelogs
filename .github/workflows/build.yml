@@ -25,7 +25,8 @@ jobs:
       - name: Upload built artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Platform Artifacts
+          name: Build Artifacts
           path: |-
+            api/build/libs/*.jar
             paper/build/libs/*-all.jar
             velocity/build/libs/*-all.jar

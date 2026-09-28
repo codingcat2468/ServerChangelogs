@@ -44,10 +44,11 @@ public interface IDialog {
             this.dialogMap.clear();
             register.accept(new ChangelogEditorDialog(
                     plugin.getChangelogStorage(),
+                    plugin.getApi(),
                     plugin.pluginConfig().useNativeFallbackPermissions()
             ));
             register.accept(new ChangelogDialog(
-                    plugin.getChangelogStorage(), this,
+                    plugin.getChangelogStorage(), plugin.getApi(), this,
                     plugin.pluginConfig().getDateFormatter(),
                     plugin.pluginConfig().showChangelogHeader(),
                     plugin.pluginConfig().createChangelogHeaderStack(),

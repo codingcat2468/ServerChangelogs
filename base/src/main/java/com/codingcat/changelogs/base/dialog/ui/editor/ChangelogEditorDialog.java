@@ -1,5 +1,6 @@
 package com.codingcat.changelogs.base.dialog.ui.editor;
 
+import com.codingcat.changelogs.api.ServerChangelogsApi;
 import com.codingcat.changelogs.base.ServerChangelogs;
 import com.codingcat.changelogs.base.compat.PacketEventsFix;
 import com.codingcat.changelogs.base.data.ChangelogStorage;
@@ -52,6 +53,7 @@ public class ChangelogEditorDialog implements IDialog {
     private final @NotNull Map<UUID, EditorSession> savedSessions = new ConcurrentHashMap<>();
     private final @Getter String id = "changelog_editor";
     private final @NotNull ChangelogStorage storage;
+    private final @NotNull ServerChangelogsApi api;
     private final boolean useFallbackPermissions;
 
     @Override
@@ -206,7 +208,7 @@ public class ChangelogEditorDialog implements IDialog {
                     return;
                 }
                 try {
-                    session.commit(this.storage);
+                    session.commit(this.storage, this.api);
                 } catch (EditorSession.CommitException e) {
                     this.showRetry(source, session.getId() + "." + e.getTranslationKeyPart(), session, sessionManager);
                     return;

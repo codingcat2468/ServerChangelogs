@@ -1,5 +1,6 @@
 package com.codingcat.changelogs.base.dialog.ui;
 
+import com.codingcat.changelogs.api.ServerChangelogsApi;
 import com.codingcat.changelogs.base.compat.PacketEventsFix;
 import com.codingcat.changelogs.base.data.ChangelogEntry;
 import com.codingcat.changelogs.base.data.ChangelogStorage;
@@ -44,6 +45,7 @@ public class ChangelogDialog implements IDialog {
     public static final int LINE_WIDTH = 440;
     private final @Getter String id = "changelog_view";
     private final @NotNull ChangelogStorage storage;
+    private final @NotNull ServerChangelogsApi api;
     private final @NotNull IDialog.Holder holder;
     private final @NotNull DateTimeFormatter dateFormatter;
     private final boolean addHeader;
@@ -126,7 +128,7 @@ public class ChangelogDialog implements IDialog {
                             .filter(e -> this.storage.isUnreadFor(e, source.getUniqueId()))
                             .map(ChangelogEntry::uid)
                             .toList();
-                    uids.forEach(uid -> storage.markAsRead(uid, source.getUniqueId()));
+                    uids.forEach(uid -> api.markAsRead(uid, source.getUniqueId()));
                     if (canManage) {
                         sessionManager.endSession(source);
                         DialogPackets.clearDialog(source, DialogPackets.PacketPhase.PLAY);

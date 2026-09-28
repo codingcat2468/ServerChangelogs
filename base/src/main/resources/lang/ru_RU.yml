@@ -121,7 +121,8 @@ dialog: # Переводы диалоговых интерфейсов (UI) пл
     entry_line: "<gray>- <reset><arg:0>" # Формат строки (добавляет серый дефис в начале)
     unspecified_author: "<dark_red>Не указан" # Автор по умолчанию
     button:
-      close: "<translate:icon.confirm> <green>Выход"
+      read_all: "<translate:icon.confirm> <green>Прочитать всё"
+      close: "<translate:icon.deny> <red>Выход"
     read: "<prefix><translate:icon.confirm> <green>Отмечено как прочитанные: <yellow><arg:0></yellow>!"
     manage:
       changelog_action:

@@ -92,6 +92,10 @@ public class PluginConfig extends Yaml {
         return getBoolean("dialog_header", true);
     }
 
+    public boolean allowCloseWithoutRead() {
+        return getBoolean("allow_close_without_read", false);
+    }
+
     public boolean useNativeFallbackPermissions() {
         return getBoolean("use_native_fallback_permissions", false);
     }

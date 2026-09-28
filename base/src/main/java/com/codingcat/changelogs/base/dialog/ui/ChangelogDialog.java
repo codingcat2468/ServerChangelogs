@@ -10,9 +10,11 @@ import com.codingcat.changelogs.base.dialog.ui.editor.ChangelogEditorDialog;
 import com.codingcat.changelogs.base.dialog.ui.editor.EditorSession;
 import com.codingcat.changelogs.platformapi.player.IPlayer;
 import com.github.retrooper.packetevents.protocol.dialog.CommonDialogData;
+import com.github.retrooper.packetevents.protocol.dialog.ConfirmationDialog;
 import com.github.retrooper.packetevents.protocol.dialog.Dialog;
 import com.github.retrooper.packetevents.protocol.dialog.DialogAction;
 import com.github.retrooper.packetevents.protocol.dialog.NoticeDialog;
+import com.github.retrooper.packetevents.protocol.dialog.action.Action;
 import com.github.retrooper.packetevents.protocol.dialog.body.DialogBody;
 import com.github.retrooper.packetevents.protocol.dialog.body.ItemDialogBody;
 import com.github.retrooper.packetevents.protocol.dialog.body.PlainMessage;
@@ -49,6 +51,7 @@ public class ChangelogDialog implements IDialog {
     private final boolean addHeader;
     private final @Nullable ItemStack headerItem;
     private final boolean useFallbackPermissions;
+    private final boolean allowCloseWithoutRead;
 
     @Override
     public @NotNull Dialog build(@NotNull IPlayer p, @NotNull DialogSessionManager sessionManager) {
@@ -76,11 +79,23 @@ public class ChangelogDialog implements IDialog {
                 null, true, false,
                 canManage ? DialogAction.NONE : DialogAction.CLOSE, body, List.of()
         );
-        ActionButton button = new ActionButton(new CommonButtonData(
+        ActionButton readAllButton = new ActionButton(new CommonButtonData(
+                translatableManual(p, "dialog.changelog.button.read_all"),
+                null, 100
+        ), sessionManager.createStaticAction(this, "confirm_read"));
+        Action closeAction = null;
+        if (canManage) closeAction = sessionManager.createSessionBasedAction(this, "close", false);
+        // Configuration-phase viewers need a callback to release the join freeze after closing without reading.
+        else if (this.allowCloseWithoutRead && sessionManager.isFrozen(p))
+            closeAction = sessionManager.createStaticAction(this, "close");
+        ActionButton closeButton = new ActionButton(new CommonButtonData(
                 translatableManual(p, "dialog.changelog.button.close"),
                 null, 60
-        ), sessionManager.createStaticAction(this, "confirm_read"));
-        return new NoticeDialog(common, button);
+        ), closeAction);
+        boolean hasUnreadEntries = this.storage.listEntries().stream().anyMatch(e -> !e.hasRead(p));
+        if (!hasUnreadEntries) return new NoticeDialog(common, closeButton);
+        if (this.allowCloseWithoutRead) return new ConfirmationDialog(common, readAllButton, closeButton);
+        return new NoticeDialog(common, new ActionButton(closeButton.getButton(), readAllButton.getAction()));
     }
 
     private @NotNull Component formatEntry(@NotNull ChangelogEntry entry, @NotNull IPlayer player, @NotNull DialogSessionManager sessionManager, boolean canManage) {
@@ -134,6 +149,12 @@ public class ChangelogDialog implements IDialog {
                     if (!uids.isEmpty())
                         source.asAudience().sendMessage(translatable("dialog.changelog.read", text(uids.size())));
                 }
+                case "close" -> {
+                    if (canManage) {
+                        sessionManager.endSession(source);
+                        DialogPackets.clearDialog(source, DialogPackets.PacketPhase.PLAY);
+                    }
+                }
                 case "reopen" -> {
                     if (canManage) this.showTo(source, sessionManager, DialogPackets.PacketPhase.PLAY);
                 }
@@ -166,7 +187,7 @@ public class ChangelogDialog implements IDialog {
             }
         } finally {
             // Ensure the player is able to continue gameplay even if any exceptions occur
-            if (action.equals("confirm_read")) sessionManager.unfreeze(source);
+            if (action.equals("confirm_read") || action.equals("close")) sessionManager.unfreeze(source);
         }
     }
 

@@ -44,6 +44,10 @@ use_native_fallback_permissions: false
 # The CONFIGURATION phase has the advantage of players not being able to take damage etc. due to the dialogs.
 dialog_phase: CONFIGURATION
 
+# Whether players can close the changelog dialog without marking unread entries as read.
+# When disabled, exiting the dialog automatically marks all entries as read.
+allow_close_without_read: false
+
 # Whether to add a header section to the changelog dialog that will show
 # above the actual changelogs. This can be used to give players a bit of context,
 # or link to e.g. a discord to give feedback, follow announcements, etc.

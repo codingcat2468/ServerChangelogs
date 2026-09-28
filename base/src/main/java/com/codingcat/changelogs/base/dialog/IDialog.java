@@ -51,7 +51,8 @@ public interface IDialog {
                     plugin.pluginConfig().getDateFormatter(),
                     plugin.pluginConfig().showChangelogHeader(),
                     plugin.pluginConfig().createChangelogHeaderStack(),
-                    plugin.pluginConfig().useNativeFallbackPermissions()
+                    plugin.pluginConfig().useNativeFallbackPermissions(),
+                    plugin.pluginConfig().allowCloseWithoutRead()
             ));
         }
 

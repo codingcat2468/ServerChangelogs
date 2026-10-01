@@ -44,6 +44,8 @@ bin/
 
 ### Local Data ###
 .env
+final/*
+final_bak/*
 
 ### run ###
 run/

@@ -7,16 +7,17 @@
 [![Github Repo](https://img.shields.io/badge/github-repo-blue?logo=github&style=for-the-badge)](https://github.com/codingcat2468/ServerChangelogs)
 [![License](https://img.shields.io/github/license/codingcat2468/ServerChangelogs?style=for-the-badge)](https://github.com/codingcat2468/ServerChangelogs/blob/master/LICENSE)
 
-
-Keep players up-to-date on server changes using intuitive, dialog-based UIs!
+Keep players up to date on server changes using intuitive, dialog-based UIs!
 </div>
 
-<hr>
+---
 
-This plugin allows you to show changelogs to your players in a very accessible form, using minecraft's new-ish **dialog UIs**! Compared to similar solutions in chat / using books, this approach can't be overseen or be hard to read, and allows players to review earlier changes by just scrolling down!
+This plugin allows you to show changelogs to your players in a very accessible form, using minecraft's newish **dialog UIs**! Compared to similar solutions in chat / using books, this approach can't be overseen or be hard to read and allows players to review earlier changes by just scrolling down!
 
 ## Features
+
 Currently, the plugin supports the following features:
+
 - Showing **new changelogs** to players upon **joining**
 - **Configuration-phase** dialogs that will show **before** players even **join the world**
 - Tracking **whether** a player **has read** a certain changelog
@@ -28,80 +29,60 @@ Currently, the plugin supports the following features:
 - A **completely customizable** changelog screen
 - Customizable **translations** based on the player's **client language**
 
-## Supported Server Software & Versions
+## Supported server software & versions
+
 ServerChangelogs is currently available as:
+
 - a **Paper** plugin (meaning it will only run on **Paper** servers, including forks like **Purpur** etc.)
 - a **Velocity** plugin (which runs on the proxy itself, no matter what backend servers are used)
 
 For paper, the initial version of the plugin is built against **26.1.2**, which doesn't always imply it won't work on lower versions. The backwards-compatibility of the Paper API can sometimes work pretty well, but that's not always the case.
+
 This should again not be a concern for velocity, since the version of the client matters less there. Do note that this plugin relies on dialogs a lot, which are only available starting with `1.21.6`.
 
 In case something does break on earlier versions, let me know and [create an issue](https://github.com/codingcat2468/ServerChangelogs/issues/new) *(as long as you're not trying to run it on 1.8)*, and I **might** be able to take a look at it! Also, keep in mind that I won't keep the version number above updated very frequently, and that updates aren't always necessary to support a new version, so just give it a try!
 
 ## Installation
-Installing this plugin should be as simple as **downloading** the appropriate version, and **copying the file** into your `plugins` folder!
+
+Installing this plugin should be as simple as **downloading** the appropriate version and **copying the file** into your `plugins` folder!
+
 After that, **restart your server** and the plugin should **generate** all the config files **automatically** (you can find them in the `plugins/ServerChangelogs` directory!)
 
-## Commands & Permissions
+## Commands & permissions
+
 The plugin provides a few commands, to which access can be controlled using the following permissions:
-<table>
-  <tr>
-    <th>Plugin Command</th>
-    <th>Permission</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td><code>/scl info</code></td>
-    <td>server_changelogs.command.info</td>
-    <td>Provides version information about the plugin & platform</td>
-  </tr>
-  <tr>
-    <td><code>/scl create</code></td>
-    <td>server_changelogs.command.create</td>
-    <td>Opens the UI to publish a new changelog</td>
-  </tr>
-  <tr>
-    <td><code>/scl view</code></td>
-    <td>server_changelogs.command.view</td>
-    <td>Opens the player-facing changelog UI</td>
-  </tr>
-  <tr>
-    <td><code>/scl reload</code></td>
-    <td>server_changelogs.command.reload</td>
-    <td>Reloads the plugin configuration and all languages</td>
-  </tr>
-  <tr>
-    <td><code>/changelog</code></td>
-    <td>server_changelogs.dedicated_command</td>
-    <td>Does the same as <code>/scl view</code>, but using a dedicated command; this can be more intuitive for players! Note that this is <b>NOT</b> <code>/changelogs</code> (no S at the end).</td>
-  </tr>
-  <tr>
-    <td>-</td>
-    <td>server_changelogs.manage</td>
-    <td>Allows the user to edit/delete existing changelogs through buttons in the changelog UI</td>
-  </tr>
-</table>
 
-Note that `/server_changelogs`, `/changelogs` and `/scl` are just **aliases** of the
-**same command** (they do the same thing and are controlled by the same permissions)!
+| Plugin Command | Permission                            | Description                                                                                                                                                     |
+|:---------------|:--------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `/scl info`    | `server_changelogs.command.info`      | Provides version information about the plugin & platform                                                                                                        |
+| `/scl create`  | `server_changelogs.command.create`    | Opens the UI to publish a new changelog                                                                                                                         |
+| `/scl view`    | `server_changelogs.command.view`      | Opens the player-facing changelog UI                                                                                                                            |
+| `/scl reload`  | `server_changelogs.command.reload`    | Reloads the plugin configuration and all languages                                                                                                              |
+| `/changelog`   | `server_changelogs.dedicated_command` | Does the same as `/scl view`, but using a dedicated command; this can be more intuitive for players! Note that this is **NOT** `/changelogs` (no S at the end). |
+| -              | `server_changelogs.manage`            | Allows the user to edit/delete existing changelogs through buttons in the changelog UI                                                                          |
 
-## Configuration & Language
-The plugin configuration can be found in `config.yml` and includes a few basic options for storage, formatting and UI layout.
+Note that `/server_changelogs`, `/changelogs` and `/scl` are just **aliases** of the **same command** (they do the same thing and are controlled by the same permissions)!
+
+## Configuration & language
+
+The plugin configuration can be found in `config.yml` and includes a few basic options for storage, formatting, and UI layout.
 
 Most of the actual UI customization can be done in the **language files** (found in the `lang` directory), which are formatted using [MiniMessage](https://docs.papermc.io/adventure/minimessage/format). If you're not sure what part of the file to edit, just search for the text you're trying to change in-game in the file!
 
 Out of the box, the plugin currently only supports **American English** (`en_US`), but more language files can be added using the same country code format (e.g. `de_DE`, `fr_FR`, `en_GB`).
 
 ### Custom MiniMessage Tags & Sub-Translations
+
 The plugin registers a few custom **MiniMessage Tags** you can use in any of the translations, including:
+
 - `<prefix>`: The plugin prefix defined in the `prefix` translation
 - `<plugin:name>`: The (internally defined) name of the plugin
 - `<plugin:description>`: The (internally defined) plugin description
 - `<plugin:version>`: The currently running version of the plugin
 - `<plugin:authors>`: A comma-separated list of plugin authors
-- `<platform:name>`: The (colored/formatted) name of the current platform *(e.g. Paper)*
+- `<platform:name>`: The (colored/formatted) name of the current platform *(e.g., Paper)*
 - `<platform:version>`: The current version that the platform the plugin runs on is reporting
-- `<translate:your.key.here>`: Allows you to include values of other translations in another translations. Unlike MM's `<lang>` tag, this is specifically made to work with the plugin's translations! Note that this **does not** support arguments as of now.
+- `<translate:your.key.here>`: Allows you to include values of other translations in other translations. Unlike MM's `<lang>` tag, this is specifically made to work with the plugin's translations! Note that this **does not** support arguments as of now.
 
 Throughout the language files, you'll also come across tags looking something like this: `<arg:0>`.
 
@@ -110,15 +91,40 @@ Those are **argument tags**, which contain specific text defined by the plugin (
 If multiple arguments are present in a certain translation, they can be identified by the number after the `:`.
 
 ## Roadmap
+
 ServerChangelogs was originally made for a **smaller minecraft server** I'm a part of, to make players aware of changes without having to rely on e.g. **Discord**. Because we wanted this feature to be available pretty fast, the plugin initially won't have as many features as I'd like it to have.
 
 The roadmap below contains some of the features that I'm **planning to add** in the future:
-- [ ] **JDBC (relational) database support**: Currently, the plugin stores all changelog data (including who has already seen what changelogs) in a plain YAML file. The reason for this mostly comes down to  the stuff above (we wanted a solution fast), so we didn't prioritize storage. This does start to cause problems over time, since the amount of data that has to be (de-)serialized for each startup/write operation increases by a lot! A proper implementation would also have to consider things like auto-migration from the existing YAML files.
-- [ ] **Pre-defined authors**: Rather than having to enter the name of the changelog's author every time (possibly including formatting), there could be a list of pre-defined authors in the plugin config that a user could choose from.
-- [ ] **Customizable changelog dialog layout**: Currently, the changelog dialog always shows all previous changelogs, with unread ones marked red. In the future, it'd be nice to have an option for this, e.g. so players on join could also only see the most recent changelog.
-- [ ] **Paged changelogs**: At the moment, all existing changelogs are just added to the dialog without any additional checks. While this is fine with just a few of them, it could quickly become an issue with a long history of changelogs. So adding a page system with a configurable amount of changelogs per page would be great!
-- [x] **Player first-join storage**: Right now, changelogs are just displayed to players upon joining whenever they haven't read them (except for the **first time** a player joins a server). This can be very confusing to new-ish players, since they weren't there for all the previous changes to begin with! A possible (while not 100% perfect) solution to this would be storing when the player initially joined the server / was first seen by the plugin, to then only display relevant changelogs to them.
-- [ ] **Other UI types**: The changes in this lower section are planned for a not-so-close future, the stuff above is more relevant for now! Anyway, even though other UI types (like chat, books, etc.) may not be as intuitive, some server owners might still prefer them. While there are plugins out there that can already do this, it would be nice for those to be available along with the additional features this plugin provides.
-- [ ] **A poll/voting system?**: A bit of a far-fetched idea, but since changelogs include a lot of, well, *change*, they can sometimes be controversial along players. I feel like a voting system might fit this plugin kind of well, so players can immediately share their opinion on a specific change right when they see it!
+- [x] **JDBC (relational) database support**:
+  Currently, the plugin stores all changelog data (including who has already seen what changelogs) in a plain YAML file.
+  The reason for this mostly comes down to the stuff above (we wanted a solution fast), so we didn't prioritize storage.
+  This does start to cause problems over time, since the amount of data that has to be (de-)serialized for each startup/write operation increases by a lot!
+  A proper implementation would also have to consider things like auto-migration from the existing YAML files.
+
+- [ ] **Pre-defined authors**:
+  Rather than having to enter the name of the changelog's author every time (possibly including formatting), there could be a list of pre-defined authors in the plugin config that a user could choose from.
+
+- [ ] **Customizable changelog dialog layout**:
+  Currently, the changelog dialog always shows all previous changelogs, with unread ones marked red.
+  In the future, it'd be nice to have an option for this, e.g. so players on join could also only see the most recent changelog.
+
+- [ ] **Paged changelogs**:
+  At the moment, all existing changelogs are just added to the dialog without any additional checks.
+  While this is fine with just a few of them, it could quickly become an issue with a long history of changelogs.
+  So adding a page system with a configurable amount of changelogs per page would be great!
+
+- [x] **Player first-join storage**:
+  Right now, changelogs are just displayed to players upon joining whenever they haven't read them (except for the **first time** a player joins a server).
+  This can be very confusing to newish players, since they weren't there for all the previous changes to begin with!
+  A possible (while not 100% perfect) solution to this would be storing when the player initially joined the server / was first seen by the plugin, to then only display relevant changelogs to them.
+
+- [ ] **Other UI types**:
+  The changes in this lower section are planned for a not-so-close future, the stuff above is more relevant for now!
+  Anyway, even though other UI types (like chat, books, etc.) may not be as intuitive, some server owners might still prefer them.
+  While there are plugins out there that can already do this, it would be nice for those to be available along with the additional features this plugin provides.
+
+- [ ] **A poll/voting system?**:
+  A bit of a far-fetched idea, but since changelogs include a lot of, well, *change*, they can sometimes be controversial along players.
+  I feel like a voting system might fit this plugin kind of well, so players can immediately share their opinion on a specific change right when they see it!
 
 > Contributions over on [GitHub](https://github.com/codingcat2468/ServerChangelogs) are always welcome, so if you do want to help out, it'd be nice to see if you are interested in implementing/helping with some of the above ideas!

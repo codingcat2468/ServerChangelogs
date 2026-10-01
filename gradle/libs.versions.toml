@@ -1,34 +1,74 @@
 [versions]
+kotlin = "2.4.20"
+kotlinx-immutable = "0.5.2"
 adventure = "5.2.0"
-lombok = "9.7.0"
 mojang-brigadier = "1.3.10"
 packetevents = "2.14.0"
-paper-api = "26.1.2.build.+"
+paper-api = "26.1.2.build.74-stable"
 resource-factory = "1.3.1"
 run-task = "3.1.0"
 shadow = "9.6.1"
 slf4j = "2.0.18"
-snakeyaml = "2.7"
+slf4k = "0.5.4"
 velocity-api = "3.5.0-SNAPSHOT"
+kotaml = "0.111.0"
+mccoroutine = "2.23.0"
+coroutines = "1.11.0"
+kotlinx-serialization = "1.11.0"
+exposed = "1.5.0"
+sqlite-jdbc = "3.53.4.0"
+netty = "4.1.118.Final"
+kover = "0.9.9"
 
 [libraries]
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+shadow-gradle-plugin = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow" }
+kotlinx-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx-immutable" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
+kotaml = { module = "io.heapy.kotaml:kotaml", version.ref = "kotaml" }
+mccoroutine-bukkit-api = { module = "com.github.shynixn.mccoroutine:mccoroutine-bukkit-api", version.ref = "mccoroutine" }
+mccoroutine-bukkit-core = { module = "com.github.shynixn.mccoroutine:mccoroutine-bukkit-core", version.ref = "mccoroutine" }
+mccoroutine-velocity-api = { module = "com.github.shynixn.mccoroutine:mccoroutine-velocity-api", version.ref = "mccoroutine" }
+mccoroutine-velocity-core = { module = "com.github.shynixn.mccoroutine:mccoroutine-velocity-core", version.ref = "mccoroutine" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 adventure-api = { module = "net.kyori:adventure-api", version.ref = "adventure" }
 adventure-slf4j = { module = "net.kyori:adventure-text-logger-slf4j", version.ref = "adventure" }
 adventure-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
 adventure-gson = { module = "net.kyori:adventure-text-serializer-gson", version.ref = "adventure" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+slf4k = { module = "ca.solo-studios:slf4k", version.ref = "slf4k" }
 mojang-brigadier = { module = "com.mojang:brigadier", version.ref = "mojang-brigadier" }
 packetevents-api = { module = "com.github.retrooper:packetevents-api", version.ref = "packetevents" }
-snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
 packetevents-paper = { module = "com.github.retrooper:packetevents-spigot", version.ref = "packetevents" }
 packetevents-velocity = { module = "com.github.retrooper:packetevents-velocity", version.ref = "packetevents" }
 paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper-api" }
 velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity-api" }
+exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
+exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
+exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exposed" }
+exposed-java-time = { module = "org.jetbrains.exposed:exposed-java-time", version.ref = "exposed" }
+sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite-jdbc" }
+netty-buffer = { module = "io.netty:netty-buffer", version.ref = "netty" }
+
+[bundles]
+adventure = [
+    "adventure-api",
+    "adventure-slf4j",
+    "adventure-minimessage",
+    "adventure-gson",
+]
+exposed = [
+    "exposed-core",
+    "exposed-jdbc",
+    "exposed-dao",
+    "exposed-java-time",
+]
 
 [plugins]
-lombok = { id = "io.freefair.lombok", version.ref = "lombok" }
-shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 run-paper = { id = "xyz.jpenilla.run-paper", version.ref = "run-task" }
 run-velocity = { id = "xyz.jpenilla.run-velocity", version.ref = "run-task" }
 resource-factory-paper-convention = { id = "xyz.jpenilla.resource-factory-paper-convention", version.ref = "resource-factory" }
 resource-factory-velocity-convention = { id = "xyz.jpenilla.resource-factory-velocity-convention", version.ref = "resource-factory" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }

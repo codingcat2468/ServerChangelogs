@@ -72,6 +72,12 @@ dialog: # Переводы диалоговых интерфейсов (UI) пл
       format: "<dark_gray>[<arg:0>]"
       edit: "<light_purple><hover:show_text:'<light_purple>✎ Редактировать строку'>✎"
       remove: "<red><hover:show_text:'<red>❌ Удалить строку'>❌"
+      move_up:
+        active: "<green><hover:show_text:'<green>▲ Переместить строку вверх'>▲"
+        disabled: "<dark_gray>▲"
+      move_down:
+        active: "<green><hover:show_text:'<green>▼ Переместить строку вниз'>▼"
+        disabled: "<dark_gray>▼"
     confirm_close:
       button:
         save_session: "<translate:icon.letter> <green><b>Сохранить и закрыть"

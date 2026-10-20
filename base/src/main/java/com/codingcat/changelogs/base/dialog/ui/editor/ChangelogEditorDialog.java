@@ -34,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -66,6 +67,8 @@ public class ChangelogEditorDialog implements IDialog {
         List<Component> previewLines = session.deserializeLines();
         BiFunction<Component, Integer, Component> lineMapper = (line, idx) -> {
             boolean isEditing = session.getEditingLineIndex() == idx;
+            boolean canMoveUp = idx > 0;
+            boolean canMoveDown = idx < previewLines.size() - 1;
             if (isEditing) line = line.decoration(TextDecoration.BOLD, true);
             String prefix = "dialog.editor.line_action.";
             NBTCompound payload = new NBTCompound();
@@ -74,12 +77,19 @@ public class ChangelogEditorDialog implements IDialog {
             if (!isEditing) edit = translatableManual(p, prefix + "format", translatable(prefix + "edit"))
                     .decoration(TextDecoration.BOLD, false)
                     .clickEvent(sessionManager.createSessionBasedClickEvent(this, "start_edit_line", payload));
+
             Component remove = translatableManual(p, prefix + "format", translatable(prefix + "remove"))
                     .decoration(TextDecoration.BOLD, false)
                     .clickEvent(sessionManager.createSessionBasedClickEvent(this, "remove_line", payload));
+            Component up = translatableManual(p, prefix + "format", translatable(prefix + "move_up." + this.getToggleState(canMoveUp)))
+                .decoration(TextDecoration.BOLD, false)
+                .clickEvent(canMoveUp ? sessionManager.createSessionBasedClickEvent(this, "move_line_up", payload) : null);
+            Component down = translatableManual(p, prefix + "format", translatable(prefix + "move_down." + this.getToggleState(canMoveDown)))
+                .decoration(TextDecoration.BOLD, false)
+                .clickEvent(canMoveDown ? sessionManager.createSessionBasedClickEvent(this, "move_line_down", payload) : null);
             Component finalCmp = line.appendSpace();
             if (!isEditing) finalCmp = finalCmp.append(edit).appendSpace();
-            return finalCmp.append(remove);
+            return finalCmp.append(up).appendSpace().append(down).appendSpace().append(remove);
         };
         ItemDialogBody itemBody = new ItemDialogBody(ItemStack.builder().type(ItemTypes.WRITABLE_BOOK).build(),
                 new PlainMessage(translatableManual(p, sessionTranslation + ".subtitle", text(session.getEntryUID() + 1)), 160),
@@ -179,6 +189,18 @@ public class ChangelogEditorDialog implements IDialog {
                 session.setCurrentLine("");
                 this.showTo(source, sessionManager, DialogPackets.PacketPhase.PLAY);
             }
+            case "move_line_up", "move_line_down" -> {
+                if (data == null) return;
+                int lineIdx = data.getNumberTagValueOrThrow("target_line").intValue();
+                int newIdx = action.equals("move_line_up") ? lineIdx - 1 : lineIdx + 1;
+                List<String> lines = session.getRawLines();
+                if (lineIdx < 0 || lineIdx >= lines.size() || newIdx < 0 || newIdx >= lines.size()) return;
+                Collections.swap(lines, lineIdx, newIdx);
+                int editing = session.getEditingLineIndex();
+                if (editing == lineIdx) session.setEditingLineIndex(newIdx);
+                else if (editing == newIdx) session.setEditingLineIndex(lineIdx);
+                this.showTo(source, sessionManager, DialogPackets.PacketPhase.PLAY);
+            }
             case "start_edit_line", "remove_line" -> {
                 if (data == null) return;
                 int lineIdx = data.getNumberTagValueOrThrow("target_line").intValue();
@@ -228,5 +250,8 @@ public class ChangelogEditorDialog implements IDialog {
 
     public static boolean permissionCheck(@NotNull String permission, @NotNull IPlayer source, boolean useFallbackPermissions) {
         return useFallbackPermissions ? source.isNativeAdmin().toBooleanOrElse(false) : source.hasPermission(ServerChangelogs.NAMESPACE + "." + permission);
+    }
+    private String getToggleState(boolean state) {
+        return state ? "active" : "disabled";
     }
 }

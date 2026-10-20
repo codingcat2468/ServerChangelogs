@@ -19,12 +19,16 @@ import net.kyori.adventure.translation.TranslationStore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -32,6 +36,7 @@ import static net.kyori.adventure.text.Component.text;
 
 @RequiredArgsConstructor
 public final class TranslationSource {
+    private static final String FALLBACK_LANGUAGE_FILE = "en_US.yml";
     private final @NotNull Path sourceDirectory;
     private final @NotNull ChangelogsMeta changelogsMeta;
     private final @NotNull PlatformMeta platformMeta;
@@ -58,6 +63,7 @@ public final class TranslationSource {
             String withoutExtension = file.getName().substring(0, file.getName().lastIndexOf('.'));
             Map<String, String> data = this.loadTranslationFile(file.toPath());
             if (data == null) continue;
+            this.addMissingKeys(file, data);
             rawTranslations.put(withoutExtension, data);
         }
         GlobalTranslator globalTranslator = GlobalTranslator.translator();
@@ -106,6 +112,72 @@ public final class TranslationSource {
             logger.warn("Invalid syntax in language file {}:", fileName, e);
         }
         return null;
+    }
+
+    /**
+     * Adds any keys that exist in the bundled defaults but are missing from the server's copy of the file, so
+     * new translations show up after an update without the server owner having to delete their lang files.
+     * Bundled languages are updated from their own built-in file, any other language from the built-in
+     * {@value #FALLBACK_LANGUAGE_FILE} so it can be translated. Missing keys are inserted next to their siblings and
+     * existing content is never modified.
+     */
+    private void addMissingKeys(@NotNull File file, @NotNull Map<String, String> translations) {
+        String fileName = file.getName();
+        String referenceText = this.loadBundledText(fileName);
+        if (referenceText == null) referenceText = this.loadBundledText(FALLBACK_LANGUAGE_FILE);
+        if (referenceText == null) return;
+        Map<String, String> defaults = new HashMap<>();
+        try {
+            this.addRawTranslationsRecursive(defaults, ServerChangelogs.NAMESPACE + ".", new Yaml().load(referenceText));
+        } catch (YAMLException e) {
+            logger.warn("Failed to read bundled translations for {}:", fileName, e);
+            return;
+        }
+        Map<String, String> missing = new LinkedHashMap<>();
+        defaults.forEach((k, v) -> {
+            if (!translations.containsKey(k)) missing.put(k, v);
+        });
+        if (missing.isEmpty()) return;
+        try {
+            String existing = Files.readString(file.toPath(), StandardCharsets.UTF_8);
+            String merged = LangFileMerger.merge(existing, referenceText);
+            Map<String, String> stillMissing = new LinkedHashMap<>(missing);
+            try {
+                Map<String, String> mergedKeys = new HashMap<>();
+                this.addRawTranslationsRecursive(mergedKeys, ServerChangelogs.NAMESPACE + ".", new Yaml().load(merged));
+                stillMissing.keySet().removeIf(mergedKeys::containsKey);
+            } catch (YAMLException e) {
+                merged = existing;
+            }
+            if (merged.equals(existing)) stillMissing = new LinkedHashMap<>(missing);
+            // Anything that couldn't be placed in the existing structure is appended as a dotted key instead
+            if (!stillMissing.isEmpty()) merged = this.appendDotted(merged, stillMissing);
+            Files.writeString(file.toPath(), merged, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            logger.warn("Failed to add missing translations to {}:", fileName, e);
+        }
+        logger.info("Added {} missing translation key(s) to language file {}", missing.size(), fileName);
+        missing.forEach(translations::putIfAbsent);
+    }
+
+    private @NotNull String appendDotted(@NotNull String text, @NotNull Map<String, String> keys) {
+        Map<String, Object> dotted = new LinkedHashMap<>();
+        String namespacePrefix = ServerChangelogs.NAMESPACE + ".";
+        keys.forEach((k, v) -> dotted.put(k.substring(namespacePrefix.length()), v));
+        DumperOptions options = new DumperOptions();
+        options.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
+        options.setWidth(Integer.MAX_VALUE);
+        String separator = !text.isEmpty() && !text.endsWith("\n") ? "\n\n" : "\n";
+        return text + separator + "# New translations added automatically by a plugin update, edit or translate them as needed:\n" + new Yaml(options).dump(dotted);
+    }
+
+    private @Nullable String loadBundledText(@NotNull String fileName) {
+        try (InputStream stream = TranslationSource.class.getClassLoader().getResourceAsStream("lang/" + fileName)) {
+            return stream == null ? null : new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            logger.warn("Failed to read bundled translations {}:", fileName, e);
+            return null;
+        }
     }
 
     private void addRawTranslationsRecursive(@NotNull Map<String, String> rawTranslations, @NotNull String prefix, @NotNull Map<String, Object> data) {

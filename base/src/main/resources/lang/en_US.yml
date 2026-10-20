@@ -72,6 +72,12 @@ dialog: # Translations for the plugin's dialog UIs
       format: "<dark_gray>[<arg:0>]"
       edit: "<light_purple><hover:show_text:'<light_purple>✎ Edit line'>✎"
       remove: "<red><hover:show_text:'<red>❌ Remove line'>❌"
+      move_up:
+        active: "<green><hover:show_text:'<green>▲ Move Line Up'>▲"
+        disabled: "<dark_gray>▲"
+      move_down:
+        active: "<green><hover:show_text:'<green>▼ Move Line Down'>▼"
+        disabled: "<dark_gray>▼"
     confirm_close:
       button:
         save_session: "<translate:icon.letter> <green><b>Save and Close"

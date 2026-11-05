@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "com.codingcat.changelogs.fabric.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ServerCommonPacketListenerImplMixin",
+    "ServerConfigurationPacketListenerImplAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

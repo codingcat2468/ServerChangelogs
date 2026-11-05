@@ -2,6 +2,7 @@ plugins {
     java
     alias(libs.plugins.lombok)
     alias(libs.plugins.shadow)
+    alias(libs.plugins.paperweight.userdev)
     alias(libs.plugins.run.paper)
     alias(libs.plugins.resource.factory.paper.convention)
 }
@@ -14,8 +15,8 @@ repositories {
 dependencies {
     implementation(project(":base"))
     implementation(project(":platformapi"))
-    compileOnly(libs.packetevents.paper)
-    compileOnly(libs.paper.api)
+    // Gives access to the vanilla classes the shared dialog layer is written against
+    paperweight.paperDevBundle(libs.versions.paper.dev.bundle)
 }
 
 paperPluginYaml {
@@ -26,7 +27,6 @@ paperPluginYaml {
     foliaSupported = true
 
     authors.addAll("codingcat2468")
-    dependencies.server.create("packetevents")
 }
 
 java {

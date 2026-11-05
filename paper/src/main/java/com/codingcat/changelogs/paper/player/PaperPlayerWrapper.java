@@ -1,8 +1,6 @@
 package com.codingcat.changelogs.paper.player;
 
 import com.codingcat.changelogs.platformapi.player.IPlayer;
-import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.protocol.player.User;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.permission.PermissionChecker;
@@ -14,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
-import java.util.Objects;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -47,11 +44,6 @@ public class PaperPlayerWrapper implements IPlayer {
     }
 
     @Override
-    public @NotNull User asPacketEventsUser() {
-        return Objects.requireNonNull(PacketEvents.getAPI().getPlayerManager().getUser(this.player), "PacketEvents player was null");
-    }
-
-    @Override
     public @NotNull Audience asAudience() {
         return this.player;
     }
@@ -63,6 +55,7 @@ public class PaperPlayerWrapper implements IPlayer {
 
     @Override
     public @NotNull Object unwrapNative() {
-        return this.player;
+        // The shared dialog layer sends vanilla packets, so it needs the vanilla player
+        return VanillaHandles.of(this.player);
     }
 }

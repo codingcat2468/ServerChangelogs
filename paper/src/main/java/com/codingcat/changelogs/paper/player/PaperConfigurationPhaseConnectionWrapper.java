@@ -2,8 +2,6 @@ package com.codingcat.changelogs.paper.player;
 
 import com.codingcat.changelogs.platformapi.player.IPlayer;
 import com.destroystokyo.paper.ClientOption;
-import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.protocol.player.User;
 import io.papermc.paper.connection.PlayerConfigurationConnection;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.audience.Audience;
@@ -52,12 +50,6 @@ public class PaperConfigurationPhaseConnectionWrapper implements IPlayer {
     }
 
     @Override
-    public @NotNull User asPacketEventsUser() {
-        Object channel = PacketEvents.getAPI().getProtocolManager().getChannel(this.getUniqueId());
-        return Objects.requireNonNull(PacketEvents.getAPI().getProtocolManager().getUser(channel), "Player channel was null");
-    }
-
-    @Override
     public @NotNull Audience asAudience() {
         return this.connection.getAudience();
     }
@@ -70,6 +62,7 @@ public class PaperConfigurationPhaseConnectionWrapper implements IPlayer {
 
     @Override
     public @NotNull Object unwrapNative() {
-        return this.connection;
+        // The shared dialog layer sends vanilla packets, so it needs the vanilla listener
+        return VanillaHandles.of(this.connection);
     }
 }

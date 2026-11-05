@@ -25,7 +25,5 @@ jobs:
       - name: Upload built artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Platform Artifacts
-          path: |-
-            paper/build/libs/*-all.jar
-            velocity/build/libs/*-all.jar
+          name: Fabric Mod
+          path: fabric/build/libs/*.jar

@@ -1,34 +1,37 @@
 [versions]
 adventure = "5.2.0"
+adventure-platform-fabric = "7.1.1"
+fabric-api = "0.161.0+26.2"
+fabric-loader = "0.20.1"
+fabric-loom = "1.19.3"
+fabric-permissions = "0.7.0"
 lombok = "9.7.0"
-mojang-brigadier = "1.3.10"
-packetevents = "2.14.0"
-paper-api = "26.1.2.build.+"
+paper-dev-bundle = "26.2.build.135-stable"
+paperweight = "2.0.0-beta.24"
 resource-factory = "1.3.1"
 run-task = "3.1.0"
 shadow = "9.6.1"
+mojang-brigadier = "1.3.10"
 slf4j = "2.0.18"
 snakeyaml = "2.7"
-velocity-api = "3.5.0-SNAPSHOT"
 
 [libraries]
+adventure-platform-fabric = { module = "net.kyori:adventure-platform-fabric", version.ref = "adventure-platform-fabric" }
+fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
+fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
+fabric-permissions = { module = "me.lucko:fabric-permissions-api", version.ref = "fabric-permissions" }
 adventure-api = { module = "net.kyori:adventure-api", version.ref = "adventure" }
 adventure-slf4j = { module = "net.kyori:adventure-text-logger-slf4j", version.ref = "adventure" }
 adventure-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
 adventure-gson = { module = "net.kyori:adventure-text-serializer-gson", version.ref = "adventure" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 mojang-brigadier = { module = "com.mojang:brigadier", version.ref = "mojang-brigadier" }
-packetevents-api = { module = "com.github.retrooper:packetevents-api", version.ref = "packetevents" }
 snakeyaml = { module = "org.yaml:snakeyaml", version.ref = "snakeyaml" }
-packetevents-paper = { module = "com.github.retrooper:packetevents-spigot", version.ref = "packetevents" }
-packetevents-velocity = { module = "com.github.retrooper:packetevents-velocity", version.ref = "packetevents" }
-paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper-api" }
-velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity-api" }
 
 [plugins]
+fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "fabric-loom" }
 lombok = { id = "io.freefair.lombok", version.ref = "lombok" }
-shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+paperweight-userdev = { id = "io.papermc.paperweight.userdev", version.ref = "paperweight" }
 run-paper = { id = "xyz.jpenilla.run-paper", version.ref = "run-task" }
-run-velocity = { id = "xyz.jpenilla.run-velocity", version.ref = "run-task" }
 resource-factory-paper-convention = { id = "xyz.jpenilla.resource-factory-paper-convention", version.ref = "resource-factory" }
-resource-factory-velocity-convention = { id = "xyz.jpenilla.resource-factory-velocity-convention", version.ref = "resource-factory" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }

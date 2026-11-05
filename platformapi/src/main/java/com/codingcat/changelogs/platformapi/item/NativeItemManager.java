@@ -5,8 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface NativeItemManager {
-    @NotNull Object adaptToPEStack(@NotNull Object nativeStack);
-
     @Nullable Object createNativeStack(@NotNull Key key, int amount);
 
     @NotNull Object applyComponentStr(@NotNull Object nativeStack, @NotNull String componentStr);

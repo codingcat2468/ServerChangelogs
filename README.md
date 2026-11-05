@@ -29,18 +29,13 @@ Currently, the plugin supports the following features:
 - Customizable **translations** based on the player's **client language**
 
 ## Supported Server Software & Versions
-ServerChangelogs is currently available as:
-- a **Paper** plugin (meaning it will only run on **Paper** servers, including forks like **Purpur** etc.)
-- a **Velocity** plugin (which runs on the proxy itself, no matter what backend servers are used)
-
-For paper, the initial version of the plugin is built against **26.1.2**, which doesn't always imply it won't work on lower versions. The backwards-compatibility of the Paper API can sometimes work pretty well, but that's not always the case.
-This should again not be a concern for velocity, since the version of the client matters less there. Do note that this plugin relies on dialogs a lot, which are only available starting with `1.21.6`.
-
-In case something does break on earlier versions, let me know and [create an issue](https://github.com/codingcat2468/ServerChangelogs/issues/new) *(as long as you're not trying to run it on 1.8)*, and I **might** be able to take a look at it! Also, keep in mind that I won't keep the version number above updated very frequently, and that updates aren't always necessary to support a new version, so just give it a try!
+This is a **Fabric** port of [ServerChangelogs](https://github.com/codingcat2468/ServerChangelogs). It is a **server-side only** mod, so vanilla clients can join without installing anything.
+It is built against **Minecraft 26.2** and relies on the vanilla dialog system, which does not exist before `1.21.6`.
 
 ## Installation
-Installing this plugin should be as simple as **downloading** the appropriate version, and **copying the file** into your `plugins` folder!
-After that, **restart your server** and the plugin should **generate** all the config files **automatically** (you can find them in the `plugins/ServerChangelogs` directory!)
+Requires [Fabric API](https://modrinth.com/mod/fabric-api). Drop the mod jar into your `mods` folder and restart your server.
+The mod generates its config files in `config/ServerChangelogs`.
+Permissions are checked through [fabric-permissions-api](https://github.com/lucko/fabric-permissions-api) (works with e.g. LuckPerms); alternatively set `use_native_fallback_permissions: true` to use vanilla operators.
 
 ## Commands & Permissions
 The plugin provides a few commands, to which access can be controlled using the following permissions:

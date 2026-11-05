@@ -3,7 +3,9 @@ package com.codingcat.changelogs.paper;
 import com.codingcat.changelogs.base.Entrypoints;
 import com.codingcat.changelogs.paper.command.PaperCommandManager;
 import com.codingcat.changelogs.paper.event.PaperEventManager;
-import com.codingcat.changelogs.paper.item.PaperNativeItemManager;
+import com.codingcat.changelogs.base.ServerChangelogs;
+import com.codingcat.changelogs.base.item.VanillaNativeItemManager;
+import com.codingcat.changelogs.paper.event.PaperCustomClickListener;
 import com.codingcat.changelogs.paper.meta.PaperPlatformMeta;
 import com.codingcat.changelogs.paper.meta.PaperPluginChangelogsMeta;
 import com.codingcat.changelogs.paper.player.PaperPlayerManager;
@@ -20,7 +22,7 @@ public class PaperChangelogsPlatform extends JavaPlugin implements ChangelogsPla
     private final @NotNull Entrypoint entrypoint = Entrypoints.create(this);
     private final @Getter PaperPlatformMeta platformMeta = new PaperPlatformMeta(getServer());
     private final @Getter PaperPluginChangelogsMeta changelogsMeta = new PaperPluginChangelogsMeta(getPluginMeta());
-    private final @Getter PaperNativeItemManager nativeItemManager = new PaperNativeItemManager();
+    private final @Getter VanillaNativeItemManager nativeItemManager = new VanillaNativeItemManager();
     private final @Getter PaperPlayerManager playerManager = new PaperPlayerManager(getServer());
     private final @Getter PaperEventManager eventManager = new PaperEventManager(this, getServer().getPluginManager());
     private final @Getter PaperCommandManager commandManager = new PaperCommandManager();
@@ -28,11 +30,6 @@ public class PaperChangelogsPlatform extends JavaPlugin implements ChangelogsPla
 
     @Override
     public void onEnable() {
-        try {
-            Class.forName("com.github.retrooper.packetevents.PacketEvents");
-        } catch (ClassNotFoundException | NoClassDefFoundError e) {
-            throw new RuntimeException("Unable to find PacketEvents! Please ensure you have the latest version of that plugin installed!", e);
-        }
         this.commandManager.supplyPlayerManager(getPlayerManager());
         this.eventManager.initMappings(getPlayerManager());
         this.earlyInitSucceeded = true;
@@ -41,6 +38,7 @@ public class PaperChangelogsPlatform extends JavaPlugin implements ChangelogsPla
         } catch (Throwable e) {
             throw new RuntimeException("Failed to start platform entrypoint", e);
         }
+        getServer().getPluginManager().registerEvents(new PaperCustomClickListener(() -> (ServerChangelogs) this.entrypoint, this.playerManager), this);
         this.commandManager.registerEvents(getLifecycleManager());
     }
 

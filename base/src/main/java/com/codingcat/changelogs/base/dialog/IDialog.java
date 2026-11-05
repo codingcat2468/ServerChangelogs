@@ -4,8 +4,8 @@ import com.codingcat.changelogs.base.ServerChangelogs;
 import com.codingcat.changelogs.base.dialog.ui.ChangelogDialog;
 import com.codingcat.changelogs.base.dialog.ui.editor.ChangelogEditorDialog;
 import com.codingcat.changelogs.platformapi.player.IPlayer;
-import com.github.retrooper.packetevents.protocol.dialog.Dialog;
-import com.github.retrooper.packetevents.protocol.nbt.NBTCompound;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.dialog.Dialog;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +27,7 @@ public interface IDialog {
         DialogPackets.showDialog(player, dialog, packetPhase);
     }
 
-    void onActionTriggered(@NotNull String action, @Nullable NBTCompound data, @NotNull IPlayer source, @NotNull DialogSessionManager sessionManager);
+    void onActionTriggered(@NotNull String action, @Nullable CompoundTag data, @NotNull IPlayer source, @NotNull DialogSessionManager sessionManager);
 
     default void attemptDestroy() throws DestroyRejectedException {
     }

@@ -48,3 +48,5 @@ bin/
 ### run ###
 run/
 run-*/
+run/
+base/logs/

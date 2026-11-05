@@ -1,2 +1,9 @@
+pluginManagement {
+    repositories {
+        maven("https://maven.fabricmc.net/")
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = "ServerChangelogs"
-include("base", "platformapi", "paper", "velocity")
+include("base", "platformapi", "paper", "fabric")

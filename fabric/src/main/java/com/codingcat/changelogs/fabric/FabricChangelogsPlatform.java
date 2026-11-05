@@ -6,7 +6,7 @@ import com.codingcat.changelogs.fabric.event.CustomClickHooks;
 import com.codingcat.changelogs.fabric.player.FabricConfigurationPhaseWrapper;
 import com.codingcat.changelogs.fabric.command.FabricCommandManager;
 import com.codingcat.changelogs.fabric.event.FabricEventManager;
-import com.codingcat.changelogs.fabric.item.FabricNativeItemManager;
+import com.codingcat.changelogs.base.item.VanillaNativeItemManager;
 import com.codingcat.changelogs.fabric.meta.FabricChangelogsMeta;
 import com.codingcat.changelogs.fabric.meta.FabricPlatformMeta;
 import com.codingcat.changelogs.fabric.player.FabricPlayerManager;
@@ -31,7 +31,7 @@ public class FabricChangelogsPlatform implements DedicatedServerModInitializer, 
     private final @Getter ComponentLogger componentLogger = ComponentLogger.logger(MOD_ID);
     private final @Getter FabricPlatformMeta platformMeta = new FabricPlatformMeta();
     private final @Getter FabricChangelogsMeta changelogsMeta = new FabricChangelogsMeta();
-    private final @Getter FabricNativeItemManager nativeItemManager = new FabricNativeItemManager();
+    private final @Getter VanillaNativeItemManager nativeItemManager = new VanillaNativeItemManager();
     private final @Getter FabricPlayerManager playerManager = new FabricPlayerManager();
     private final @Getter FabricEventManager eventManager = new FabricEventManager(playerManager);
     private final @Getter FabricCommandManager commandManager = new FabricCommandManager(playerManager);

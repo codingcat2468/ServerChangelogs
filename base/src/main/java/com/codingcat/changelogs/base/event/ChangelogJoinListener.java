@@ -32,8 +32,8 @@ public class ChangelogJoinListener {
     public void registerEvents(@NotNull IEventManager manager) {
         // A player leaving while frozen would otherwise keep the configuration phase thread parked forever
         manager.registerIdentified(PlayerDisconnectEvent.class, KEY, e -> {
-            sessionManager.unfreeze(e.getPlayer());
-            sessionManager.endSession(e.getPlayer());
+            sessionManager.unfreeze(e.getPlayerId());
+            sessionManager.endSession(e.getPlayerId());
         });
         switch (config.getDialogPacketPhase()) {
             case PLAY ->

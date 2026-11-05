@@ -68,9 +68,9 @@ public class FabricEventManager implements IEventManager {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
                 this.dispatch(PlayerJoinEvent.class, new PlayerJoinEvent(this.playerManager.fromNative(handler.getPlayer()), true)));
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
-                this.dispatch(PlayerDisconnectEvent.class, new PlayerDisconnectEvent(this.playerManager.fromNative(handler.getPlayer()))));
+                this.dispatch(PlayerDisconnectEvent.class, new PlayerDisconnectEvent(handler.getPlayer().getUUID())));
         ServerConfigurationConnectionEvents.DISCONNECT.register((handler, server) ->
-                this.dispatch(PlayerDisconnectEvent.class, new PlayerDisconnectEvent(new FabricConfigurationPhaseWrapper(handler, server))));
+                this.dispatch(PlayerDisconnectEvent.class, new PlayerDisconnectEvent(handler.getOwner().id())));
         ServerConfigurationConnectionEvents.CONFIGURE.register((handler, server) -> {
             if (this.hasListeners(PlayerEnterConfigurationPhaseEvent.class))
                 handler.addTask(new DispatchTask(handler, server));

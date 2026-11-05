@@ -1,13 +1,17 @@
 package com.codingcat.changelogs.platformapi.event.impl;
 
-import com.codingcat.changelogs.platformapi.player.IPlayer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
-/** Fired when a player leaves, in either the configuration or the play phase. */
+import java.util.UUID;
+
+/**
+ * Fired when a player's connection closes, in any phase. Only the UUID is available, since some platforms
+ * no longer have a player object at this point (e.g. when leaving during the configuration phase).
+ */
 @Getter
 @RequiredArgsConstructor
 public final class PlayerDisconnectEvent implements IEvent {
-    private final @NotNull IPlayer player;
+    private final @NotNull UUID playerId;
 }

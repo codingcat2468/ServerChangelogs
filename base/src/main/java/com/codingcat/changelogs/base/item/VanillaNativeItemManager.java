@@ -1,4 +1,4 @@
-package com.codingcat.changelogs.fabric.item;
+package com.codingcat.changelogs.base.item;
 
 import com.codingcat.changelogs.platformapi.item.NativeItemManager;
 import com.mojang.brigadier.StringReader;
@@ -13,7 +13,8 @@ import net.minecraft.world.item.ItemStackTemplate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class FabricNativeItemManager implements NativeItemManager {
+/** Works on every platform that runs the vanilla classes (Fabric and Paper). */
+public class VanillaNativeItemManager implements NativeItemManager {
     @Override
     public @Nullable Object createNativeStack(@NotNull Key key, int amount) {
         Identifier id = Identifier.tryParse(key.asString());

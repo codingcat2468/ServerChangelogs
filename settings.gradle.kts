@@ -6,4 +6,4 @@ pluginManagement {
 }
 
 rootProject.name = "ServerChangelogs"
-include("base", "platformapi", "fabric")
+include("base", "platformapi", "paper", "fabric")

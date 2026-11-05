@@ -148,8 +148,12 @@ public class DialogSessionManager implements PacketListener {
     }
 
     public void endSession(@NotNull IPlayer player) {
-        this.activeSessions.remove(player.getUniqueId());
-        this.sessionData.remove(player.getUniqueId());
+        this.endSession(player.getUniqueId());
+    }
+
+    public void endSession(@NotNull UUID playerId) {
+        this.activeSessions.remove(playerId);
+        this.sessionData.remove(playerId);
     }
 
     public boolean isSessionActive(@NotNull IPlayer player, @NotNull IDialog dialog) {
@@ -170,7 +174,11 @@ public class DialogSessionManager implements PacketListener {
     }
 
     public void unfreeze(@NotNull IPlayer player) {
-        CompletableFuture<?> future = this.frozenViewers.get(player.getUniqueId());
+        this.unfreeze(player.getUniqueId());
+    }
+
+    public void unfreeze(@NotNull UUID playerId) {
+        CompletableFuture<?> future = this.frozenViewers.get(playerId);
         if (future != null) future.complete(null);
     }
 

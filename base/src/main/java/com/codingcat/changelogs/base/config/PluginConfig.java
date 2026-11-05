@@ -1,11 +1,10 @@
 package com.codingcat.changelogs.base.config;
 
 import com.codingcat.changelogs.base.ServerChangelogs;
-import com.codingcat.changelogs.base.compat.PacketEventsFix;
 import com.codingcat.changelogs.base.data.ChangelogStorage;
 import com.codingcat.changelogs.base.dialog.DialogPackets;
 import com.codingcat.changelogs.platformapi.item.NativeItemManager;
-import com.github.retrooper.packetevents.protocol.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
@@ -20,7 +19,6 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class PluginConfig extends Yaml {
@@ -48,7 +46,6 @@ public class PluginConfig extends Yaml {
             createChangelogStorage();
             getDateFormatter();
             createChangelogHeaderStack();
-            getEnabledManualWorkarounds();
             return null;
         } catch (Exception e) {
             return e.getMessage();
@@ -77,17 +74,6 @@ public class PluginConfig extends Yaml {
         }
     }
 
-    public @NotNull Set<PacketEventsFix.Workaround> getEnabledManualWorkarounds() {
-        List<String> rawWorkarounds = getList("enable_manual_workarounds", String.class);
-        return rawWorkarounds.stream().map(workaround -> {
-            try {
-                return PacketEventsFix.Workaround.valueOf(workaround.toUpperCase(Locale.ROOT));
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid manual workaround ID \"" + workaround + "\"");
-            }
-        }).collect(Collectors.toUnmodifiableSet());
-    }
-
     public boolean showChangelogHeader() {
         return getBoolean("dialog_header", true);
     }
@@ -96,7 +82,7 @@ public class PluginConfig extends Yaml {
         return getBoolean("use_native_fallback_permissions", false);
     }
 
-    public @Nullable ItemStack createChangelogHeaderStack() {
+    public @Nullable ItemStackTemplate createChangelogHeaderStack() {
         String value = getString("dialog_header_item", null);
         return value != null ? createStack(value) : null;
     }
@@ -109,14 +95,8 @@ public class PluginConfig extends Yaml {
         return (boolean) this.data.getOrDefault(key, defaultValue);
     }
 
-    private <T> @NotNull List<T> getList(@NotNull String key, @NotNull Class<T> cls) {
-        List<?> list = (List<?>) this.data.get(key);
-        if (list == null) return List.of();
-        return list.stream().map(cls::cast).toList();
-    }
-
     @SuppressWarnings("PatternValidation")
-    private @NotNull ItemStack createStack(@NotNull String input) {
+    private @NotNull ItemStackTemplate createStack(@NotNull String input) {
         String idPart = input.contains("[") ? input.substring(0, input.indexOf('[')) : input;
         String componentPart = input.contains("[") ? input.substring(input.indexOf('[')) : null;
         Key inputKey;
@@ -129,6 +109,6 @@ public class PluginConfig extends Yaml {
         Object nativeStack = nativeManager.createNativeStack(inputKey, 1);
         Objects.requireNonNull(nativeStack, "Unknown item ID \"" + idPart + "\"");
         if (componentPart != null) nativeStack = nativeManager.applyComponentStr(nativeStack, componentPart);
-        return (ItemStack) nativeManager.adaptToPEStack(nativeStack);
+        return (ItemStackTemplate) nativeStack;
     }
 }

@@ -2,36 +2,29 @@ package com.codingcat.changelogs.base.dialog;
 
 import com.codingcat.changelogs.base.dialog.ui.ChangelogDialog;
 import com.codingcat.changelogs.platformapi.player.IPlayer;
-import com.github.retrooper.packetevents.protocol.dialog.*;
-import com.github.retrooper.packetevents.protocol.dialog.action.Action;
-import com.github.retrooper.packetevents.protocol.dialog.body.DialogBody;
-import com.github.retrooper.packetevents.protocol.dialog.body.PlainMessage;
-import com.github.retrooper.packetevents.protocol.dialog.body.PlainMessageDialogBody;
-import com.github.retrooper.packetevents.protocol.dialog.button.ActionButton;
-import com.github.retrooper.packetevents.protocol.dialog.button.CommonButtonData;
-import com.github.retrooper.packetevents.protocol.player.User;
-import com.github.retrooper.packetevents.wrapper.PacketWrapper;
-import com.github.retrooper.packetevents.wrapper.configuration.server.WrapperConfigServerClearDialog;
-import com.github.retrooper.packetevents.wrapper.configuration.server.WrapperConfigServerShowDialog;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerClearDialog;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerShowDialog;
-import lombok.RequiredArgsConstructor;
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.permission.PermissionChecker;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.util.TriState;
+import net.minecraft.core.Holder;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.common.ClientboundClearDialogPacket;
+import net.minecraft.network.protocol.common.ClientboundShowDialogPacket;
+import net.minecraft.server.dialog.*;
+import net.minecraft.server.dialog.action.Action;
+import net.minecraft.server.dialog.body.DialogBody;
+import net.minecraft.server.dialog.body.PlainMessage;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.Optional;
 
+import static com.codingcat.changelogs.base.dialog.NativeComponents.toNative;
 import static com.codingcat.changelogs.base.lang.TranslationSource.translatableManual;
 
 public final class DialogPackets {
     public static void showDialog(@NotNull IPlayer player, @NotNull Dialog dialog, @NotNull PacketPhase packetPhase) {
-        packet(player, packetPhase == PacketPhase.CONFIGURATION ? new WrapperConfigServerShowDialog(dialog) : new WrapperPlayServerShowDialog(dialog));
+        // The show/clear dialog packets are shared by both phases, the phase only decides when the dialog is first shown
+        send(player, new ClientboundShowDialogPacket(Holder.direct(dialog)));
     }
 
     public static void showSimpleNotice(@NotNull IPlayer player, @NotNull String titleTranslation, @NotNull String bodyTranslation) {
@@ -40,92 +33,41 @@ public final class DialogPackets {
 
     public static void showSimpleConfirm(@NotNull IPlayer player, @NotNull String titleTranslation, @NotNull String bodyTranslation, @NotNull Action confirm, boolean confirmDanger, @NotNull Action cancel, @NotNull PacketPhase packetPhase) {
         CommonDialogData common = createSimpleDialog(player, titleTranslation, bodyTranslation, false, false);
-        ActionButton confirmButton = new ActionButton(new CommonButtonData(translatableManual(player, "dialog.popup.confirm" + (confirmDanger ? "_danger" : "")), null, 100), confirm);
-        ActionButton cancelButton = new ActionButton(new CommonButtonData(translatableManual(player, "dialog.popup.cancel"), null, 100), cancel);
-        showDialog(player, new MultiActionDialog(common, List.of(confirmButton, cancelButton), null, 2), packetPhase);
+        ActionButton confirmButton = new ActionButton(new CommonButtonData(toNative(translatableManual(player, "dialog.popup.confirm" + (confirmDanger ? "_danger" : ""))), Optional.empty(), 100), Optional.of(confirm));
+        ActionButton cancelButton = new ActionButton(new CommonButtonData(toNative(translatableManual(player, "dialog.popup.cancel")), Optional.empty(), 100), Optional.of(cancel));
+        showDialog(player, new MultiActionDialog(common, List.of(confirmButton, cancelButton), Optional.empty(), 2), packetPhase);
     }
 
     public static void showSimpleNotice(@NotNull IPlayer player, @NotNull String titleTranslation, @NotNull String bodyTranslation, @Nullable Action action, @NotNull PacketPhase packetPhase) {
         CommonDialogData common = createSimpleDialog(player, titleTranslation, bodyTranslation, action == null, true);
-        ActionButton closeButton = new ActionButton(new CommonButtonData(translatableManual(player, "dialog.popup.close"), null, 40), action);
+        ActionButton closeButton = new ActionButton(new CommonButtonData(toNative(translatableManual(player, "dialog.popup.close")), Optional.empty(), 40), Optional.ofNullable(action));
         showDialog(player, new NoticeDialog(common, closeButton), packetPhase);
     }
 
     public static @NotNull CommonDialogData createSimpleDialog(@NotNull IPlayer player, @NotNull String titleTranslation, @NotNull String bodyTranslation, boolean closeAfter, boolean canEscape) {
-        DialogBody body = new PlainMessageDialogBody(new PlainMessage(translatableManual(player, bodyTranslation), ChangelogDialog.LINE_WIDTH));
+        DialogBody body = new PlainMessage(toNative(translatableManual(player, bodyTranslation)), ChangelogDialog.LINE_WIDTH);
         return new CommonDialogData(
-                translatableManual(player, titleTranslation),
-                null, canEscape, false,
+                toNative(translatableManual(player, titleTranslation)),
+                Optional.empty(), canEscape, false,
                 closeAfter ? DialogAction.CLOSE : DialogAction.NONE, List.of(body), List.of()
         );
     }
 
     public static void clearDialog(@NotNull IPlayer player, @NotNull PacketPhase packetPhase) {
-        packet(player, packetPhase == PacketPhase.CONFIGURATION ? new WrapperConfigServerClearDialog() : new WrapperPlayServerClearDialog());
+        send(player, ClientboundClearDialogPacket.INSTANCE);
     }
 
-    public static @NotNull IPlayer wrapPacketEventsUser(@NotNull User user) {
-        return new PacketEventsUserWrappedPlayer(user);
-    }
-
-    private static void packet(@NotNull IPlayer player, @NotNull PacketWrapper<?> wrapper) {
-        User user = (User) player.asPacketEventsUser();
-        user.sendPacket(wrapper);
+    private static void send(@NotNull IPlayer player, @NotNull Packet<?> packet) {
+        ServerCommonPacketListenerImpl connection = switch (player.unwrapNative()) {
+            case ServerPlayer p -> p.connection;
+            case ServerCommonPacketListenerImpl c -> c;
+            default -> throw new IllegalArgumentException("Cannot send packets to " + player.unwrapNative());
+        };
+        connection.send(packet);
     }
 
     public enum PacketPhase {
         CONFIGURATION,
         PLAY
-    }
-
-    @RequiredArgsConstructor
-    private static class PacketEventsUserWrappedPlayer implements IPlayer {
-        private static final @NotNull RuntimeException EXCEPTION = new UnsupportedOperationException("Not supported on PacketEvents user wrapper");
-        private final @NotNull User user;
-
-        @Override
-        public @NotNull UUID getUniqueId() {
-            return this.user.getUUID();
-        }
-
-        @Override
-        public @NotNull Locale getClientLocale() {
-            throw EXCEPTION;
-        }
-
-        @Override
-        public boolean isFirstJoin() {
-            throw EXCEPTION;
-        }
-
-        @Override
-        public @NotNull TriState isNativeAdmin() {
-            return TriState.NOT_SET;
-        }
-
-        @Override
-        public void kick(@Nullable Component reason) {
-            throw EXCEPTION;
-        }
-
-        @Override
-        public @NotNull Object asPacketEventsUser() {
-            return this.user;
-        }
-
-        @Override
-        public @NotNull Audience asAudience() {
-            return Audience.empty();
-        }
-
-        @Override
-        public @NotNull PermissionChecker asPermissionChecker() {
-            return PermissionChecker.always(TriState.NOT_SET);
-        }
-
-        @Override
-        public @NotNull Object unwrapNative() {
-            return this.user;
-        }
     }
 }

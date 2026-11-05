@@ -56,8 +56,3 @@ dialog_header: true
 # including additional components (e.g. custom textures)!
 # Example: "minecraft:paper[minecraft:item_model='my_resourcepack:newspaper_item']"
 dialog_header_item: "minecraft:written_book"
-
-# -- DO NOT MODIFY UNLESS YOU KNOW WHAT YOU ARE DOING --
-# Manually enable workarounds/fixes for certain bugs in e.g. PacketEvents
-# that normally don't apply to the current version
-enable_manual_workarounds: []

@@ -1,6 +1,5 @@
 package com.codingcat.changelogs.base.dialog.ui;
 
-import com.codingcat.changelogs.base.compat.PacketEventsFix;
 import com.codingcat.changelogs.base.data.ChangelogEntry;
 import com.codingcat.changelogs.base.data.ChangelogStorage;
 import com.codingcat.changelogs.base.dialog.DialogPackets;
@@ -9,19 +8,17 @@ import com.codingcat.changelogs.base.dialog.IDialog;
 import com.codingcat.changelogs.base.dialog.ui.editor.ChangelogEditorDialog;
 import com.codingcat.changelogs.base.dialog.ui.editor.EditorSession;
 import com.codingcat.changelogs.platformapi.player.IPlayer;
-import com.github.retrooper.packetevents.protocol.dialog.CommonDialogData;
-import com.github.retrooper.packetevents.protocol.dialog.Dialog;
-import com.github.retrooper.packetevents.protocol.dialog.DialogAction;
-import com.github.retrooper.packetevents.protocol.dialog.NoticeDialog;
-import com.github.retrooper.packetevents.protocol.dialog.body.DialogBody;
-import com.github.retrooper.packetevents.protocol.dialog.body.ItemDialogBody;
-import com.github.retrooper.packetevents.protocol.dialog.body.PlainMessage;
-import com.github.retrooper.packetevents.protocol.dialog.body.PlainMessageDialogBody;
-import com.github.retrooper.packetevents.protocol.dialog.button.ActionButton;
-import com.github.retrooper.packetevents.protocol.dialog.button.CommonButtonData;
-import com.github.retrooper.packetevents.protocol.item.ItemStack;
-import com.github.retrooper.packetevents.protocol.nbt.NBTCompound;
-import com.github.retrooper.packetevents.protocol.nbt.NBTInt;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.dialog.ActionButton;
+import net.minecraft.server.dialog.CommonButtonData;
+import net.minecraft.server.dialog.CommonDialogData;
+import net.minecraft.server.dialog.Dialog;
+import net.minecraft.server.dialog.DialogAction;
+import net.minecraft.server.dialog.NoticeDialog;
+import net.minecraft.server.dialog.body.DialogBody;
+import net.minecraft.server.dialog.body.ItemBody;
+import net.minecraft.server.dialog.body.PlainMessage;
+import net.minecraft.world.item.ItemStackTemplate;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
@@ -32,8 +29,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiFunction;
 
+import static com.codingcat.changelogs.base.dialog.NativeComponents.toNative;
 import static com.codingcat.changelogs.base.dialog.ui.editor.ChangelogEditorDialog.permissionCheck;
 import static com.codingcat.changelogs.base.lang.TranslationSource.translatable;
 import static com.codingcat.changelogs.base.lang.TranslationSource.translatableManual;
@@ -47,7 +46,7 @@ public class ChangelogDialog implements IDialog {
     private final @NotNull IDialog.Holder holder;
     private final @NotNull DateTimeFormatter dateFormatter;
     private final boolean addHeader;
-    private final @Nullable ItemStack headerItem;
+    private final @Nullable ItemStackTemplate headerItem;
     private final boolean useFallbackPermissions;
 
     @Override
@@ -57,29 +56,26 @@ public class ChangelogDialog implements IDialog {
         List<DialogBody> body = this.storage.listEntries()
                 .reversed().stream()
                 .map(e -> formatEntry(e, p, sessionManager, canManage))
-                .map(c -> (DialogBody) new PlainMessageDialogBody(new PlainMessage(c, LINE_WIDTH)))
+                .map(c -> (DialogBody) new PlainMessage(toNative(c), LINE_WIDTH))
                 .toList();
         if (body.isEmpty())
-            body = List.of(new PlainMessageDialogBody(new PlainMessage(translatableManual(p, "dialog.changelog.empty"), 350)));
+            body = List.of(new PlainMessage(toNative(translatableManual(p, "dialog.changelog.empty")), 350));
         if (this.addHeader) {
             body = new ArrayList<>(body);
-            PlainMessage headerMessage = new PlainMessage(translatableManual(p, "dialog.changelog.header"), 260);
-            ItemDialogBody itemBody = null;
-            if (headerItem != null) {
-                itemBody = new ItemDialogBody(headerItem, headerMessage, false, false, 17, 17);
-                PacketEventsFix.fixItemBody(itemBody);
-            }
-            body.addFirst(headerItem != null ? itemBody : new PlainMessageDialogBody(headerMessage));
+            PlainMessage headerMessage = new PlainMessage(toNative(translatableManual(p, "dialog.changelog.header")), 260);
+            body.addFirst(headerItem != null
+                    ? new ItemBody(headerItem, Optional.of(headerMessage), false, false, 17, 17)
+                    : headerMessage);
         }
         CommonDialogData common = new CommonDialogData(
-                translatableManual(p, "dialog.changelog.title"),
-                null, true, false,
+                toNative(translatableManual(p, "dialog.changelog.title")),
+                Optional.empty(), true, false,
                 canManage ? DialogAction.NONE : DialogAction.CLOSE, body, List.of()
         );
         ActionButton button = new ActionButton(new CommonButtonData(
-                translatableManual(p, "dialog.changelog.button.close"),
-                null, 60
-        ), sessionManager.createStaticAction(this, "confirm_read"));
+                toNative(translatableManual(p, "dialog.changelog.button.close")),
+                Optional.empty(), 60
+        ), Optional.of(sessionManager.createStaticAction(this, "confirm_read")));
         return new NoticeDialog(common, button);
     }
 
@@ -91,12 +87,10 @@ public class ChangelogDialog implements IDialog {
         );
         if (canManage) {
             String prefix = "dialog.changelog.manage.changelog_action.";
-            NBTCompound payload = new NBTCompound();
-            payload.setTag("uid", new NBTInt(entry.uid()));
             Component edit = translatableManual(player, prefix + "format", translatable(prefix + "edit"))
-                    .clickEvent(sessionManager.createSessionBasedClickEvent(this, "start_editing", payload));
+                    .clickEvent(sessionManager.createSessionBasedClickEvent(this, "start_editing", "uid", entry.uid()));
             Component delete = translatableManual(player, prefix + "format", translatable(prefix + "delete"))
-                    .clickEvent(sessionManager.createSessionBasedClickEvent(this, "request_delete", payload));
+                    .clickEvent(sessionManager.createSessionBasedClickEvent(this, "request_delete", "uid", entry.uid()));
             entryComponent = entryComponent.appendSpace().append(edit).appendSpace().append(delete);
         }
         return entryComponent;
@@ -116,7 +110,7 @@ public class ChangelogDialog implements IDialog {
     }
 
     @Override
-    public void onActionTriggered(@NotNull String action, @Nullable NBTCompound data, @NotNull IPlayer source, @NotNull DialogSessionManager sessionManager) {
+    public void onActionTriggered(@NotNull String action, @Nullable CompoundTag data, @NotNull IPlayer source, @NotNull DialogSessionManager sessionManager) {
         try {
             boolean canManage = this.canManage(source, sessionManager);
             switch (action) {
@@ -139,7 +133,7 @@ public class ChangelogDialog implements IDialog {
                 }
                 case "start_editing" -> {
                     if (data == null || !canManage) return;
-                    int uid = data.getNumberTagValueOrThrow("uid").intValue();
+                    int uid = DialogSessionManager.requireInt(data, "uid");
                     ChangelogEntry entry = this.storage.getByUID(uid);
                     if (entry == null) return;
                     sessionManager.endSession(source);
@@ -149,9 +143,9 @@ public class ChangelogDialog implements IDialog {
                 }
                 case "request_delete" -> {
                     if (data == null || !canManage) return;
-                    int uid = data.getNumberTagValueOrThrow("uid").intValue();
-                    NBTCompound payload = new NBTCompound();
-                    payload.setTag("uid", new NBTInt(uid));
+                    int uid = DialogSessionManager.requireInt(data, "uid");
+                    CompoundTag payload = new CompoundTag();
+                    payload.putInt("uid", uid);
                     String prefix = "dialog.changelog.manage.confirm_delete.";
                     DialogPackets.showSimpleConfirm(source, prefix + "title", prefix + "content",
                             sessionManager.createSessionBasedAction(this, "confirm_delete", payload, false), true,
@@ -159,7 +153,7 @@ public class ChangelogDialog implements IDialog {
                 }
                 case "confirm_delete" -> {
                     if (data == null || !canManage) return;
-                    int uid = data.getNumberTagValueOrThrow("uid").intValue();
+                    int uid = DialogSessionManager.requireInt(data, "uid");
                     this.storage.removeEntry(uid);
                     this.showTo(source, sessionManager, DialogPackets.PacketPhase.PLAY);
                 }

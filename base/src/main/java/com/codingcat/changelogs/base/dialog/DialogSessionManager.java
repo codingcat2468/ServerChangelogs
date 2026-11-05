@@ -2,32 +2,20 @@ package com.codingcat.changelogs.base.dialog;
 
 import com.codingcat.changelogs.base.ServerChangelogs;
 import com.codingcat.changelogs.platformapi.player.IPlayer;
-import com.codingcat.changelogs.platformapi.player.IPlayerManager;
-import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.event.PacketListener;
-import com.github.retrooper.packetevents.event.PacketListenerCommon;
-import com.github.retrooper.packetevents.event.PacketListenerPriority;
-import com.github.retrooper.packetevents.event.PacketReceiveEvent;
-import com.github.retrooper.packetevents.protocol.chat.clickevent.CustomClickEvent;
-import com.github.retrooper.packetevents.protocol.dialog.action.Action;
-import com.github.retrooper.packetevents.protocol.dialog.action.DynamicCustomAction;
-import com.github.retrooper.packetevents.protocol.dialog.action.StaticAction;
-import com.github.retrooper.packetevents.protocol.nbt.NBTCompound;
-import com.github.retrooper.packetevents.protocol.packettype.PacketType;
-import com.github.retrooper.packetevents.protocol.util.NbtCodecException;
-import com.github.retrooper.packetevents.resources.ResourceLocation;
-import com.github.retrooper.packetevents.util.adventure.NbtTagHolder;
-import com.github.retrooper.packetevents.wrapper.common.client.WrapperCommonClientCustomClickAction;
-import com.github.retrooper.packetevents.wrapper.configuration.client.WrapperConfigClientCustomClickAction;
-import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientCustomClickAction;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.dialog.action.Action;
+import net.minecraft.server.dialog.action.CustomAll;
+import net.minecraft.server.dialog.action.StaticAction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
@@ -38,25 +26,47 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @RequiredArgsConstructor
-public class DialogSessionManager implements PacketListener {
+public class DialogSessionManager {
     private static final @NotNull Function<String, Key> KEY_GENERATOR = path -> ServerChangelogs.KEY_GENERATOR.apply("dialog/" + path);
-    public static final @NotNull BinaryTagHolder NONE_TAG_HOLDER = BinaryTagHolder.binaryTagHolder("");
     private final Set<Key> staticActions = ConcurrentHashMap.newKeySet();
     private final Map<UUID, String> activeSessions = new ConcurrentHashMap<>();
     private final Map<UUID, Object> sessionData = new ConcurrentHashMap<>();
     private final Map<UUID, CompletableFuture<?>> frozenViewers = new ConcurrentHashMap<>();
     private final @NotNull IDialog.Holder dialogHolder;
-    private final @NotNull IPlayerManager playerManager;
-    private @Nullable PacketListenerCommon selfListener;
 
-    public void handleCustomClick(@NotNull WrapperCommonClientCustomClickAction<?> packetWrapper, @NotNull IPlayer player) {
-        Key key = packetWrapper.getId().key();
+    /** Thrown by the payload helpers below for missing/mistyped fields, i.e. modified clients. */
+    public static final class InvalidPayloadException extends RuntimeException {
+        InvalidPayloadException(@NotNull String key) {
+            super("Missing or invalid payload field \"" + key + "\"");
+        }
+    }
+
+    public static int requireInt(@NotNull CompoundTag tag, @NotNull String key) {
+        return tag.getInt(key).orElseThrow(() -> new InvalidPayloadException(key));
+    }
+
+    public static @NotNull String requireString(@NotNull CompoundTag tag, @NotNull String key) {
+        return tag.getString(key).orElseThrow(() -> new InvalidPayloadException(key));
+    }
+
+    public static boolean requireBoolean(@NotNull CompoundTag tag, @NotNull String key) {
+        return tag.getBoolean(key).orElseThrow(() -> new InvalidPayloadException(key));
+    }
+
+    /**
+     * Handles a custom click action packet. Click events inside of text can't carry a payload that survives
+     * the Adventure -> vanilla conversion, so they encode one integer in the ID: {@code <action>.<field>.<value>}.
+     */
+    public void handleCustomClick(@NotNull Identifier id, @NotNull Optional<Tag> payload, @NotNull IPlayer player) {
+        if (!id.getNamespace().equals(ServerChangelogs.NAMESPACE)) return;
+        String path = id.getPath();
         int fSIdx, lSIdx;
-        if (!key.namespace().equals(ServerChangelogs.NAMESPACE) || (fSIdx = key.value().indexOf('/')) == -1
-                || !key.value().startsWith("dialog/") || (fSIdx + 1) >= (lSIdx = key.value().lastIndexOf('/'))
-                || lSIdx == (key.value().length() - 1)) return;
-        String dialogId = key.value().substring(fSIdx + 1, lSIdx);
-        String actionId = key.value().substring(lSIdx + 1);
+        if ((fSIdx = path.indexOf('/')) == -1 || !path.startsWith("dialog/") || (fSIdx + 1) >= (lSIdx = path.lastIndexOf('/'))
+                || lSIdx == (path.length() - 1)) return;
+        String dialogId = path.substring(fSIdx + 1, lSIdx);
+        String[] actionParts = path.substring(lSIdx + 1).split("\\.");
+        String actionId = actionParts[0];
+        Key key = KEY_GENERATOR.apply(dialogId + "/" + actionId);
         if (!dialogId.equals(activeSessions.get(player.getUniqueId())) && !staticActions.contains(key)) return;
         IDialog dialog;
         try {
@@ -64,67 +74,49 @@ public class DialogSessionManager implements PacketListener {
         } catch (NullPointerException e) {
             return;
         }
+        CompoundTag data = payload.filter(CompoundTag.class::isInstance).map(CompoundTag.class::cast).orElse(null);
+        if (actionParts.length == 3) {
+            try {
+                data = new CompoundTag();
+                data.putInt(actionParts[1], Integer.parseInt(actionParts[2]));
+            } catch (NumberFormatException _) {
+                return;
+            }
+        }
         try {
-            dialog.onActionTriggered(actionId, (NBTCompound) packetWrapper.getPayload(), player, this);
-        } catch (NbtCodecException _) {
-            // Ignore invalid or unexpected NBT payloads like malicious packets sent by a modified client
+            dialog.onActionTriggered(actionId, data, player, this);
+        } catch (InvalidPayloadException _) {
+            // Ignore invalid or unexpected payloads like malicious packets sent by a modified client
         } catch (Exception e) {
             throw new RuntimeException("Failed to run dialog action handler for \"" + dialogId + "\", action \"" + actionId + "\"", e);
         }
     }
 
-    @Override
-    public void onPacketReceive(@NotNull PacketReceiveEvent event) {
-        if (event.getPacketType() == PacketType.Play.Client.CUSTOM_CLICK_ACTION)
-            handleCustomClick(new WrapperPlayClientCustomClickAction(event), playerFromPacket(event));
-        if (event.getPacketType() == PacketType.Configuration.Client.CUSTOM_CLICK_ACTION)
-            handleCustomClick(new WrapperConfigClientCustomClickAction(event), playerFromPacket(event));
-    }
-
-    private @NotNull IPlayer playerFromPacket(@NotNull PacketReceiveEvent event) {
-        try {
-            return this.playerManager.fromNative(event.getPlayer());
-        } catch (IllegalArgumentException _) {
-            // If obtaining the native IPlayer implementation fails (e.g. during the configuration phase,
-            // where event.getPlayer() can return null), fall back to a wrapped PE User implementation.
-            return DialogPackets.wrapPacketEventsUser(event.getUser());
-        }
-    }
-
-    public void registerEvents() {
-        this.selfListener = PacketEvents.getAPI().getEventManager().registerListener(this, PacketListenerPriority.NORMAL);
-    }
-
-    public void unregisterEvents() {
-        PacketEvents.getAPI().getEventManager().unregisterListener(this.selfListener);
-        this.selfListener = null;
-    }
-
     public @NotNull Action createStaticAction(@NotNull IDialog dialog, @NotNull String id) {
         Key key = this.createStaticKey(dialog, id);
-        return new StaticAction(new CustomClickEvent(new ResourceLocation(key), null));
-    }
-
-    public @NotNull ClickEvent<?> createStaticClickEvent(@NotNull IDialog dialog, @NotNull String id) {
-        return ClickEvent.custom(this.createStaticKey(dialog, id), NONE_TAG_HOLDER);
+        return new StaticAction(new net.minecraft.network.chat.ClickEvent.Custom(toIdentifier(key), Optional.empty()));
     }
 
     public @NotNull Action createSessionBasedAction(@NotNull IDialog dialog, @NotNull String id, boolean includeInputs) {
         return this.createSessionBasedAction(dialog, id, null, includeInputs);
     }
 
-    public @NotNull Action createSessionBasedAction(@NotNull IDialog dialog, @NotNull String id, @Nullable NBTCompound data, boolean includeInputs) {
-        Key key = this.createSessionBasedKey(dialog, id);
-        CustomClickEvent clickEvent = new CustomClickEvent(new ResourceLocation(key), data);
-        return includeInputs ? new DynamicCustomAction(clickEvent.getId(), data) : new StaticAction(clickEvent);
+    public @NotNull Action createSessionBasedAction(@NotNull IDialog dialog, @NotNull String id, @Nullable CompoundTag data, boolean includeInputs) {
+        Identifier identifier = toIdentifier(this.createSessionBasedKey(dialog, id));
+        return includeInputs ? new CustomAll(identifier, Optional.ofNullable(data))
+                : new StaticAction(new net.minecraft.network.chat.ClickEvent.Custom(identifier, Optional.ofNullable(data)));
     }
 
     public @NotNull ClickEvent<?> createSessionBasedClickEvent(@NotNull IDialog dialog, @NotNull String id) {
         return ClickEvent.custom(this.createSessionBasedKey(dialog, id), null);
     }
 
-    public @NotNull ClickEvent<?> createSessionBasedClickEvent(@NotNull IDialog dialog, @NotNull String id, @Nullable NBTCompound data) {
-        return ClickEvent.custom(this.createSessionBasedKey(dialog, id), data != null ? new NbtTagHolder(data) : NONE_TAG_HOLDER);
+    public @NotNull ClickEvent<?> createSessionBasedClickEvent(@NotNull IDialog dialog, @NotNull String id, @NotNull String field, int value) {
+        return ClickEvent.custom(this.createSessionBasedKey(dialog, id + "." + field + "." + value), null);
+    }
+
+    private static @NotNull Identifier toIdentifier(@NotNull Key key) {
+        return Identifier.fromNamespaceAndPath(key.namespace(), key.value());
     }
 
     private @NotNull Key createSessionBasedKey(@NotNull IDialog dialog, @NotNull String id) {

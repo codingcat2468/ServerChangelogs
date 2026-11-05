@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "server_changelogs",
+  "version": "${version}",
+  "name": "ServerChangelogs",
+  "description": "Keep players up-to-date on server changes using intuitive, dialog-based UIs!",
+  "authors": ["codingcat2468"],
+  "contact": {
+    "sources": "https://github.com/codingcat2468/ServerChangelogs"
+  },
+  "license": "MIT",
+  "environment": "server",
+  "entrypoints": {
+    "server": ["com.codingcat.changelogs.fabric.FabricChangelogsPlatform"]
+  },
+  "mixins": ["server_changelogs.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.19.2",
+    "fabric-api": "*",
+    "minecraft": "~26.2-",
+    "java": ">=25"
+  }
+}

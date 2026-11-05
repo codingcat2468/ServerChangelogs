@@ -4,6 +4,12 @@ plugins {
 }
 
 dependencies {
+    testImplementation(platform("org.junit:junit-bom:5.13.4"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation(libs.adventure.api)
+    testImplementation(libs.adventure.gson)
+    testImplementation(libs.snakeyaml)
     implementation(project(":platformapi"))
     // Since SnakeYAML is included in some platforms, it is included as compileOnly here
     // The library can be declared as implementation and shadowed on platforms where it is not natively included
@@ -19,4 +25,8 @@ dependencies {
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(25)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

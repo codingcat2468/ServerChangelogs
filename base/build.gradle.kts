@@ -22,6 +22,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation(libs.adventure.api)
     testImplementation(libs.adventure.gson)
+    testImplementation(libs.snakeyaml)
 }
 
 tasks.test {

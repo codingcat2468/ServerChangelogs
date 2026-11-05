@@ -4,6 +4,7 @@ import com.codingcat.changelogs.fabric.player.FabricConfigurationPhaseWrapper;
 import com.codingcat.changelogs.fabric.player.FabricPlayerManager;
 import com.codingcat.changelogs.platformapi.event.IEventManager;
 import com.codingcat.changelogs.platformapi.event.impl.IEvent;
+import com.codingcat.changelogs.platformapi.event.impl.PlayerDisconnectEvent;
 import com.codingcat.changelogs.platformapi.event.impl.PlayerEnterConfigurationPhaseEvent;
 import com.codingcat.changelogs.platformapi.event.impl.PlayerJoinEvent;
 import lombok.RequiredArgsConstructor;
@@ -66,6 +67,10 @@ public class FabricEventManager implements IEventManager {
     public void registerHooks() {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
                 this.dispatch(PlayerJoinEvent.class, new PlayerJoinEvent(this.playerManager.fromNative(handler.getPlayer()), true)));
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
+                this.dispatch(PlayerDisconnectEvent.class, new PlayerDisconnectEvent(this.playerManager.fromNative(handler.getPlayer()))));
+        ServerConfigurationConnectionEvents.DISCONNECT.register((handler, server) ->
+                this.dispatch(PlayerDisconnectEvent.class, new PlayerDisconnectEvent(new FabricConfigurationPhaseWrapper(handler, server))));
         ServerConfigurationConnectionEvents.CONFIGURE.register((handler, server) -> {
             if (this.hasListeners(PlayerEnterConfigurationPhaseEvent.class))
                 handler.addTask(new DispatchTask(handler, server));
@@ -87,12 +92,13 @@ public class FabricEventManager implements IEventManager {
 
         @Override
         public void start(@NotNull Consumer<Packet<?>> packetSender) {
-            // shortcut: a player disconnecting while frozen leaves this thread parked, upgrade by cancelling the freeze future on disconnect
             CompletableFuture.runAsync(() -> dispatch(PlayerEnterConfigurationPhaseEvent.class,
                             new PlayerEnterConfigurationPhaseEvent(new FabricConfigurationPhaseWrapper(handler, server), true)), asyncExecutor)
                     .whenComplete((_, err) -> {
                         if (err != null) LOGGER.error("Failed to handle configuration phase event", err);
-                        this.server.execute(() -> this.handler.completeTask(TASK_TYPE));
+                        this.server.execute(() -> {
+                            if (this.handler.isAcceptingMessages()) this.handler.completeTask(TASK_TYPE);
+                        });
                     });
         }
 

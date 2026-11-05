@@ -7,6 +7,7 @@ import com.codingcat.changelogs.base.dialog.DialogSessionManager;
 import com.codingcat.changelogs.base.dialog.IDialog;
 import com.codingcat.changelogs.base.dialog.ui.ChangelogDialog;
 import com.codingcat.changelogs.platformapi.event.IEventManager;
+import com.codingcat.changelogs.platformapi.event.impl.PlayerDisconnectEvent;
 import com.codingcat.changelogs.platformapi.event.impl.PlayerEnterConfigurationPhaseEvent;
 import com.codingcat.changelogs.platformapi.event.impl.PlayerJoinEvent;
 import com.codingcat.changelogs.platformapi.player.IPlayer;
@@ -29,6 +30,11 @@ public class ChangelogJoinListener {
     private final @NotNull PluginConfig config;
 
     public void registerEvents(@NotNull IEventManager manager) {
+        // A player leaving while frozen would otherwise keep the configuration phase thread parked forever
+        manager.registerIdentified(PlayerDisconnectEvent.class, KEY, e -> {
+            sessionManager.unfreeze(e.getPlayer());
+            sessionManager.endSession(e.getPlayer());
+        });
         switch (config.getDialogPacketPhase()) {
             case PLAY ->
                     manager.registerIdentified(PlayerJoinEvent.class, KEY, e -> checkShowDialog(e.getPlayer(), false));
